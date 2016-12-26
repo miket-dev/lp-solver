@@ -41,7 +41,7 @@ namespace LpSolve.Test
 			Assert.AreEqual(-3.0, halfSpace2.Plane.D);
 			Assert.AreEqual(-15.0, halfSpace3.Plane.D);
 
-
+			//x-2y -> min
 			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace3 }, new Vector(new double[] { 1.0, -2.0 }));
 			solver.Run();
 
