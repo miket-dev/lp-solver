@@ -124,7 +124,7 @@ namespace LpSolve.Elements
 
 		public Vector MoveDown()
 		{
-			var coordinates = new double[this._coordinates.Length];
+			var coordinates = new double[this._coordinates.Length - 1];
 			for (int i = 0; i < coordinates.Length; i++)
 			{
 				coordinates[i] = this._coordinates[i];

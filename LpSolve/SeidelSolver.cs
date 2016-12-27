@@ -50,7 +50,7 @@ namespace LpSolve
 
 		public void Run()
 		{
-			while (this._halfSpaces.Any() || this._resultType != SeidelResultEnum.Infeasible)
+			while (this._halfSpaces.Any() && this._resultType != SeidelResultEnum.Infeasible)
 			{
 				var space = this._halfSpaces[_random.Next(this._halfSpaces.Count)];
 
@@ -93,6 +93,13 @@ namespace LpSolve
 					foreach (var item in this._halfSpaces)
 					{
 						passItems.Add(item.MoveDown());
+					}
+
+					passItems = passItems.Where(x => x.Plane.Exists).ToList();
+
+					if (passItems.Count == 0)
+					{
+						return;
 					}
 
 					var innerSolver = new SeidelSolver(passItems, this._vector.MoveDown());
