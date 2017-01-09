@@ -84,7 +84,25 @@ namespace LpSolve
 			{
 				if (halfSpace.GetDimension() == 1)
 				{
+					var sections = new List<HalfSpace>();
+					var processed = 0;
+					foreach (var item in this._halfSpaces)
+					{
+						if (!sections.TrueForAll(x => x.Contains(item.Plane.Point)))
+						{
+							this._resultType = SeidelResultEnum.Infeasible;
+							this._resultPoint = null;
+							return;
+						}
 
+						sections.Add(item);
+						processed++;
+
+						var result = sections.Select(x => x.Plane.Point).OrderBy(x => x.X).First();
+
+						this._resultPoint = result;
+						this._resultType = SeidelResultEnum.Minimum;
+					}
 				}
 				else
 				{
