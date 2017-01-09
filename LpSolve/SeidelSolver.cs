@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LpSolve.Elements;
+using LpSolve.Interface;
 
 namespace LpSolve
 {
@@ -57,6 +58,70 @@ namespace LpSolve
 				this._halfSpaces.Remove(space);
 				Iterate(space);
 			}
+
+			if (this._resultType == SeidelResultEnum.Ambigous && this._vector.GetDimension() > 1)
+			{
+				//if the result point is still ambigous it is required to iterate through vertices of polyhedron
+				//firstly required to find vertices
+
+				var resultVertices = new List<Point>();
+
+				foreach (var item in this._resultPolyhedron)
+				{
+					foreach (var innerItem in this._resultPolyhedron)
+					{
+						var resultVertex = item.Plane.Intersect(innerItem.Plane);
+						if (resultVertex != null && resultVertex is Point)
+						{
+							resultVertices.Add((Point)resultVertex);
+						}
+					}
+				}
+
+				if (resultVertices.Any())
+				{
+					foreach (var item in this._resultPolyhedron)
+					{
+						for (int i = 0; i < resultVertices.Count; i++)
+						{
+							if (!item.Contains(resultVertices[i]))
+							{
+								resultVertices.RemoveAt(i);
+								i = i - 1;
+							}
+						}
+					}
+
+					var minimumPoint = resultVertices.First();
+
+					for (int i = 0; i < this._vector.GetDimension(); i++)
+					{
+						if (this._vector.GetAt(i) > 0)
+						{
+							foreach (var item in resultVertices)
+							{
+								if (item.GetAt(i) < minimumPoint.GetAt(i))
+								{
+									minimumPoint = item;
+								}
+							}
+						}
+						else //if this._vector.GetAt(i) < 0
+						{
+							foreach (var item in resultVertices)
+							{
+								if (item.GetAt(i) > minimumPoint.GetAt(i))
+								{
+									minimumPoint = item;
+								}
+							}
+						}
+					}
+
+					this._resultPoint = minimumPoint;
+					this._resultType = SeidelResultEnum.Minimum;
+				}
+			}
 		}
 
 		private void Iterate(HalfSpace halfSpace)
@@ -66,6 +131,7 @@ namespace LpSolve
 			if (this._resultPolyhedron.Count == 1)
 			{
 				this._resultType = SeidelResultEnum.Ambigous;
+				this._resultPoint = halfSpace.Plane.Point;
 				return;
 			}
 
@@ -98,7 +164,24 @@ namespace LpSolve
 						sections.Add(item);
 						processed++;
 
-						var result = sections.Select(x => x.Plane.Point).OrderBy(x => x.X).First();
+						var result = sections.First().Plane.Point;
+						foreach (var section in sections)
+						{
+							if (this._vector.X > 0)
+							{
+								if (section.Plane.Point.X < result.X)
+								{
+									result = section.Plane.Point;
+								}
+							}
+							else
+							{
+								if (section.Plane.Point.X > result.X)
+								{
+									result = section.Plane.Point;
+								}
+							}
+						}
 
 						this._resultPoint = result;
 						this._resultType = SeidelResultEnum.Minimum;

@@ -37,7 +37,7 @@ namespace LpSolve.Elements
 
 		public Point MoveDown()
 		{
-			var coordinates = new double[this._coordinates.Length];
+			var coordinates = new double[this._coordinates.Length - 1];
 			for (int i = 0; i < coordinates.Length; i++)
 			{
 				coordinates[i] = this._coordinates[i];
@@ -58,5 +58,12 @@ namespace LpSolve.Elements
 
 			return new Point(coordinates);
 		}
+
+#if DEBUG
+		public override string ToString()
+		{
+			return string.Format("({0:n2},{1:n2})", this.X, this.Y);
+		}
+#endif
 	}
 }

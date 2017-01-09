@@ -57,59 +57,84 @@ namespace LpSolve.Elements
 
 		public Plane MoveDown()
 		{
+			//if this plane can be proected to the target plane then return it
+			var d = this.GetDimension();
+			var proectPointCoordinates = new double[d];
+			for (int i = 0; i < proectPointCoordinates.Length; i++)
+			{
+				proectPointCoordinates[i] = 0.0;
+			}
+
+			var proectVectorCoordinates = new double[d];
+			for (int i = 0; i < proectVectorCoordinates.Length; i++)
+			{
+				proectVectorCoordinates[i] = 0.0;
+			}
+
+			proectVectorCoordinates[d - 1] = 1.0;
+
+
+			if (d == 1)
+			{
+				throw new ArgumentException("Could not move down from 1 dimension!");
+			}
+
+			var result = new Plane(this._point.MoveDown(), this._vector.MoveDown());
+
+			if (this.Intersect(new Plane(new Point(proectPointCoordinates), new Vector(proectVectorCoordinates))) == null)
+			{
+				result.Exists = false;
+			}
+			
+			return result;
+		}
+
+		/// <summary>
+		/// Returns line or point due to dimension of plane
+		/// </summary>
+		public IElement Intersect(Plane plane)
+		{
 			switch (this._point.GetDimension())
 			{
 				case 3:
 					{
-						//searching intersect line between this plane and Oxy
 						//|ax+by+cz+d=0;
-						//|z=0;
+						//|a1x+b1y+c1z+d1=0;
+						var resultVector = this._vector.CrossProduct(plane._vector);
 
-						//y = (-ax - d) / b
-						if (this._vector.GetAt(1) != 0.0)
-						{
-							var y = (this._vector.GetAt(0) - this.D) / this._vector.GetAt(1);
-							var x = 0.0;
-							if (this._vector.GetAt(0) != 0.0)
-							{
-								x = (y * this._vector.GetAt(1) + this.D) / (-this._vector.GetAt(0));
-							}
+						var isCollinear = false;
 
-							return new Plane(new Point(new double[] { x, y }), this._vector.MoveDown());
-						}
-						else if (this._vector.GetAt(0) != 0.0)
+						for (int i = 0; i < resultVector.GetDimension(); i++)
 						{
-							var x = (this._vector.GetAt(1) - this.D) / this._vector.GetAt(0);
-							var y = 0.0;
-							if (this._vector.GetAt(1) != 0.0)
-							{
-								y = (x * this._vector.GetAt(0) + this.D) / (-this._vector.GetAt(1));
-							}
+							isCollinear |= resultVector.GetAt(i) == 0.0;
+						}
 
-							return new Plane(new Point(new double[] { x, y }), this._vector.MoveDown());
-						}
-						else
+						if (!isCollinear)
 						{
-							var plane = new Plane(this._point.MoveDown(), this._vector.MoveDown());
-							plane.Exists = false;
-							return plane;
+							var x0 = (this._vector.Y * plane.D - plane.Vector.Y * this.D) / (this.Vector.X * plane.Vector.Y - plane.Vector.X * this.Vector.Y);
+							var y0 = (this.D * plane.Vector.X - plane.Vector.X * this.D) / (this.Vector.X * plane.Vector.Y - plane.Vector.X * this.Vector.Y);
+							var z0 = x0 / (this.Vector.Y * plane.Vector.Z - plane.Vector.Y * this.Vector.Z);
+
+							return new Line(new Point(new double[] { x0, y0, z0 }), resultVector);
 						}
+
+						return null;
 					}
 				case 2:
 					{
-						//|y = ax + d;
-						//|y = 0;
-						if (this._vector.GetAt(0) == 0.0)
+						//|ax+by+d = 0
+						//|a1x+b1y+d = 0
+
+						var delta = this.Vector.X * plane.Vector.Y - plane.Vector.X * this.Vector.Y;
+						if (delta != 0.0)
 						{
-							var plane = new Plane(this._point.MoveDown(), this._vector.MoveDown());
-							plane.Exists = false;
-							return plane;
+							var x0 = (plane.Vector.Y * this.D - this.Vector.Y * plane.D) / delta;
+							var y0 = (this.Vector.X * plane.D - plane.Vector.X * this.D) / delta;
+
+							return new Point(new double[] { x0, y0 });
 						}
-						else
-						{
-							var x = this.D / this._vector.GetAt(0);
-							return new Plane(new Point(new double[] { x }), this._vector.MoveDown());
-						}
+
+						return null;
 					}
 				default:
 					//TODO: implement

@@ -23,7 +23,7 @@ namespace LpSolve.Elements
 
 		public bool Contains(Point p)
 		{
-			var vect = Vector.CreateFromPoints(p, this._plane.Point);
+			var vect = Vector.CreateFromPoints(this._plane.Point, p);
 
 			if (this._isOnPositive)
 			{
