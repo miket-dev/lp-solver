@@ -65,5 +65,26 @@ namespace LpSolve.Elements
 			return string.Format("({0:n2},{1:n2})", this.X, this.Y);
 		}
 #endif
+
+		public override int GetHashCode()
+		{
+			return 0;
+		}
+
+		public override bool Equals(object obj)
+		{
+			var p = obj as Point;
+			if (p == null)
+				return false;
+
+			var result = true;
+
+			for (int i = 0; i < this.GetDimension(); i++)
+			{
+				result &= this.GetAt(i) == p.GetAt(i);
+			}
+
+			return result;
+		}
 	}
 }

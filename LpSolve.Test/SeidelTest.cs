@@ -9,7 +9,7 @@ namespace LpSolve.Test
 	public class CalculationTest
 	{
 		[TestMethod]
-		public void Seidel_SimpleTest_9()
+		public void Seidel_SimpleTest()
 		{
 			//5x+3y>=30
 			var halfSpace1 = new HalfSpace(
@@ -42,7 +42,7 @@ namespace LpSolve.Test
 					new Plane(
 							new Point(new double[] { 0.0, 0.0 }),
 							new Vector(new double[] { 1.0, 0.0 })
-						), 
+						),
 					true
 				);
 
@@ -55,9 +55,9 @@ namespace LpSolve.Test
 					true
 				);
 
-			Assert.AreEqual(-30.0, halfSpace1.Plane.D);
-			Assert.AreEqual(-3.0, halfSpace2.Plane.D);
-			Assert.AreEqual(-15.0, halfSpace3.Plane.D);
+			Assert.AreEqual(30.0, halfSpace1.Plane.D);
+			Assert.AreEqual(3.0, halfSpace2.Plane.D);
+			Assert.AreEqual(15.0, halfSpace3.Plane.D);
 
 			//x-2y -> min
 			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace3, halfSpace4, halfSpace5 }, new Vector(new double[] { 1.0, -2.0 }));
@@ -66,6 +66,53 @@ namespace LpSolve.Test
 			Assert.AreEqual(SeidelResultEnum.Minimum, solver.ResultType);
 			Assert.AreEqual(15.0, solver.ResultPoint.X);
 			Assert.AreEqual(12.0, solver.ResultPoint.Y);
+		}
+
+		[TestMethod]
+		public void Seidel_SimpleTest_2()
+		{
+			//x<=3
+			var halfSpace1 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 3.0, 0.0 }),
+							new Vector(new double[] { 1.0, 0.0 })
+						),
+					false
+				);
+			//x>=-1
+			var halfSpace2 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { -1.0, 0.0 }),
+							new Vector(new double[] { 1.0, 0.0 })
+						),
+					true
+				);
+
+			//-2x-3y<=6
+			var halfSpace3 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { -3.0, 0.0 }),
+							new Vector(new double[] { -2.0, -3.0 })
+						),
+					true
+				);
+
+			//-x+2y<=6
+			var halfSpace4 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0, 3.0 }),
+							new Vector(new double[] { -1.0, 2.0 })
+						),
+					false
+				);
+
+			//2x-y -> min
+			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace3, halfSpace4 }, new Vector(new double[] { 2.0, -1.0 }));
+			solver.Run();
+
+			Assert.AreEqual(SeidelResultEnum.Minimum, solver.ResultType);
+			Assert.AreEqual(-4.2857142857142856, solver.ResultPoint.X);
+			Assert.AreEqual(0.8571428571428571, solver.ResultPoint.Y);
 		}
 	}
 }

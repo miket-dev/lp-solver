@@ -80,40 +80,38 @@ namespace LpSolve
 
 				if (resultVertices.Any())
 				{
-					foreach (var item in this._resultPolyhedron)
-					{
-						for (int i = 0; i < resultVertices.Count; i++)
-						{
-							if (!item.Contains(resultVertices[i]))
-							{
-								resultVertices.RemoveAt(i);
-								i = i - 1;
-							}
-						}
-					}
+					resultVertices = resultVertices.Distinct().ToList();
 
 					var minimumPoint = resultVertices.First();
 
+					var maximumIndex = -1;
+					var maxValue = double.MinValue;
 					for (int i = 0; i < this._vector.GetDimension(); i++)
 					{
-						if (this._vector.GetAt(i) > 0)
+						if (Math.Abs(this._vector.GetAt(i)) > maxValue)
 						{
-							foreach (var item in resultVertices)
+							maxValue = Math.Abs(this._vector.GetAt(i));
+							maximumIndex = i;
+						}
+					}
+
+					if (this._vector.GetAt(maximumIndex) > 0)
+					{
+						foreach (var item in resultVertices)
+						{
+							if (item.GetAt(maximumIndex) < minimumPoint.GetAt(maximumIndex))
 							{
-								if (item.GetAt(i) < minimumPoint.GetAt(i))
-								{
-									minimumPoint = item;
-								}
+								minimumPoint = item;
 							}
 						}
-						else //if this._vector.GetAt(i) < 0
+					}
+					else //if this._vector.GetAt(i) < 0
+					{
+						foreach (var item in resultVertices)
 						{
-							foreach (var item in resultVertices)
+							if (item.GetAt(maximumIndex) > minimumPoint.GetAt(maximumIndex))
 							{
-								if (item.GetAt(i) > minimumPoint.GetAt(i))
-								{
-									minimumPoint = item;
-								}
+								minimumPoint = item;
 							}
 						}
 					}

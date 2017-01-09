@@ -42,7 +42,7 @@ namespace LpSolve.Elements
 					var size = this.Point.GetDimension();
 					for (int i = 0; i < size; i++)
 					{
-						this._d -= this.Point.GetAt(i) * this.Vector.GetAt(i);
+						this._d += this.Point.GetAt(i) * this.Vector.GetAt(i);
 					}
 				}
 
