@@ -15,6 +15,14 @@ namespace LpSolve.Elements
 		public Point Point { get { return this._point; } }
 		public Vector Vector { get { return this._vector; } }
 
+		public double C
+		{
+			get
+			{
+				return this._vector.X * this._point.X + this._vector.Y + this._point.Y;
+			}
+		}
+
 		public Line(Point point, Vector vector)
 		{
 			if (point.GetDimension() != vector.GetDimension())
@@ -34,6 +42,24 @@ namespace LpSolve.Elements
 		public int GetDimension()
 		{
 			return this._point.GetDimension();
+		}
+
+		/// <summary>
+		/// Valid for 2 dimensions
+		/// </summary>
+		/// <param name="line"></param>
+		/// <returns></returns>
+		public Point Intersect(Line line)
+		{
+			var den = this._vector.X * line._vector.Y - this._vector.Y * line.Vector.X;
+
+			if (den == 0)
+				return null;
+
+			var x = (this.C * line.Vector.Y - this.Vector.Y * line.C) / den;
+			var y = (this._vector.X * line.C - this.C * line.Vector.X) / den;
+
+			return new Point(new double[] { x, y });
 		}
 
 		public static Line CreateFromPoints(Point p0, Point p1)

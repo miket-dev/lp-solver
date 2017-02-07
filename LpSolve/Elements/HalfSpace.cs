@@ -33,6 +33,18 @@ namespace LpSolve.Elements
 			return vect.ScalarProduct(this._plane.Vector) <= 0;
 		}
 
+		public IElement Intersect(HalfSpace halfSpace)
+		{
+			var dimension = this.GetDimension();
+			if (dimension == 1) //it is a 1-d ray
+			{
+				//we do not really know what is the intersection
+				return null;
+			}
+
+			return this._plane.Intersect(halfSpace._plane);
+		}
+
 		public HalfSpace MoveDown()
 		{
 			return new HalfSpace(this._plane.MoveDown(), this._isOnPositive);

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using LpSolve.Elements;
+using LpSolve.Result;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LpSolve.Test
 {
+	//http://www.matburo.ru/ex_mp.php?p1=mpgr
+
 	[TestClass]
 	public class CalculationTest
 	{
@@ -63,9 +66,9 @@ namespace LpSolve.Test
 			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace3, halfSpace4, halfSpace5 }, new Vector(new double[] { 1.0, -2.0 }));
 			solver.Run();
 
-			Assert.AreEqual(SeidelResultEnum.Minimum, solver.ResultType);
-			Assert.AreEqual(15.0, solver.ResultPoint.X);
-			Assert.AreEqual(12.0, solver.ResultPoint.Y);
+			Assert.IsInstanceOfType(solver.Result, typeof(MinimumSeidelResult));
+			Assert.AreEqual(15.0, solver.Result.Point.X);
+			Assert.AreEqual(12.0, solver.Result.Point.Y);
 		}
 
 		[TestMethod]
@@ -110,9 +113,55 @@ namespace LpSolve.Test
 			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace3, halfSpace4 }, new Vector(new double[] { 2.0, -1.0 }));
 			solver.Run();
 
-			Assert.AreEqual(SeidelResultEnum.Minimum, solver.ResultType);
-			Assert.AreEqual(-4.2857142857142856, solver.ResultPoint.X);
-			Assert.AreEqual(0.8571428571428571, solver.ResultPoint.Y);
+			Assert.IsInstanceOfType(solver.Result, typeof(MinimumSeidelResult));
+			Assert.AreEqual(-4.2857142857142856, solver.Result.Point.X);
+			Assert.AreEqual(0.8571428571428571, solver.Result.Point.Y);
 		}
+
+		[TestMethod]
+		public void Seidel_EmptyResult()
+		{
+			//-x + 2y <= 30
+			var halfSpace1 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { -1.0, 0.0 }),
+							new Vector(new double[] { -1.0, 0.0 })
+						),
+					true
+				);
+			//-5x + y <= 25
+			var halfSpace2 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 3.0, 0.0 }),
+							new Vector(new double[] { 1.0, 0.0 })
+						),
+					true
+				);
+
+			//x <= 0
+			var halfSpace4 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0.0, 0.0 }),
+							new Vector(new double[] { -1.0, 0.0 })
+						),
+					true
+				);
+
+			//y <= 0
+			var halfSpace5 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0.0, 0.0 }),
+							new Vector(new double[] { 0.0, -1.0 })
+						),
+					true
+				);
+
+			//x + y -> min
+			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace4, halfSpace5 }, new Vector(new double[] { 1.0, 1.0 }));
+			solver.Run();
+
+			Assert.IsInstanceOfType(solver.Result, typeof(InfeasibleSeidelResult));
+		}
+
 	}
 }
