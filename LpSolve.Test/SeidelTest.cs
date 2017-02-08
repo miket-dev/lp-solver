@@ -172,12 +172,12 @@ namespace LpSolve.Test
 							new Point(new double[] { 0.0, 0.0, -8.0 }),
 							new Vector(new double[] { 1.0, 1.0, -1.0 })
 						),
-					true
+					false
 				);
 			//x - y + 2z >=2
 			var halfSpace2 = new HalfSpace(
 					new Plane(
-							new Point(new double[] { 0.0, 0.0, -1 }),
+							new Point(new double[] { 0.0, 0.0, 1 }),
 							new Vector(new double[] { 1.0, -1.0, 2.0 })
 						),
 					true
@@ -206,6 +206,54 @@ namespace LpSolve.Test
 			solver.Run();
 
 			Assert.IsInstanceOfType(solver.Result, typeof(UnboundedSeidelResult));
+		}
+
+		[TestMethod]
+		public void Seidel_3D_2()
+		{
+			//y + z >= 4
+			var halfSpace1 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0.0, 0.0, 4.0 }),
+							new Vector(new double[] { 0.0, 1.0, 1.0 })
+						),
+					true
+				);
+			//2x + y + 2z >=6
+			var halfSpace2 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0.0, 0.0, -3.0 }),
+							new Vector(new double[] { 2.0, 1.0, 2.0 })
+						),
+					true
+				);
+
+			//2x-y+2z >= 2
+			var halfSpace4 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0.0, 0.0, 1.0 }),
+							new Vector(new double[] { 2.0, -1.0, 2.0 })
+						),
+					true
+				);
+
+			//x >= 0
+			var halfSpace5 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0.0, 0.0, 0.0 }),
+							new Vector(new double[] { 1.0, 0.0, 0.0 })
+						),
+					true
+				);
+
+			//3x + 2y + z -> min
+			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace4, halfSpace5 }, new Vector(new double[] { 3.0, 2.0, 1.0 }));
+			solver.Run();
+
+			Assert.IsInstanceOfType(solver.Result, typeof(MinimumSeidelResult));
+			Assert.AreEqual(0.0, solver.Result.Point.X);
+			Assert.AreEqual(0.0, solver.Result.Point.Y);
+			Assert.AreEqual(4.0, solver.Result.Point.Z);
 		}
 
 	}

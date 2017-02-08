@@ -15,7 +15,7 @@ namespace LpSolve
 		private Vector _vector;
 
 		private Polyhedron _resultPolyhedron;
-		private Random _random;
+		private FakeRandom _random;
 		private SeidelResult _resultType;
 
 		public SeidelResult Result { get { return this._resultType; } }
@@ -27,7 +27,7 @@ namespace LpSolve
 			this._halfSpaces = halfSpaces;
 			this._vector = vector;
 
-			this._random = new Random(DateTime.Now.Millisecond);
+			this._random = new FakeRandom(DateTime.Now.Millisecond);
 			this._resultPolyhedron = new Polyhedron();
 			this._resultType = new UnboundedSeidelResult();
 		}

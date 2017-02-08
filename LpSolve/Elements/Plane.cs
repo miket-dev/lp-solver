@@ -85,7 +85,7 @@ namespace LpSolve.Elements
 			{
 				result.Exists = false;
 			}
-			
+
 			return result;
 		}
 
@@ -98,24 +98,38 @@ namespace LpSolve.Elements
 			{
 				case 3:
 					{
-						//|ax+by+cz+d=0;
-						//|a1x+b1y+c1z+d1=0;
-						var resultVector = this._vector.CrossProduct(plane._vector);
+						//|ax+by+cz-d=0;
+						//|a1x+b1y+c1z-d1=0;
 
-						var isCollinear = false;
-
-						for (int i = 0; i < resultVector.GetDimension(); i++)
+						//check if planes are parallel
+						if (this.IsNotNull(this._vector.X, this._vector.Y, this._vector.Z, plane.Vector.X, plane.Vector.Y, plane.Vector.Z))
 						{
-							isCollinear |= resultVector.GetAt(i) == 0.0;
+							var coeffX = this._vector.X / plane.Vector.X;
+							var coeffY = this._vector.Y / plane.Vector.Y;
+							var coeffZ = this._vector.Z / plane.Vector.Z;
+
+							if (coeffX == coeffY && coeffY == coeffZ)
+							{
+								return null;
+							}
 						}
 
-						if (!isCollinear)
+						//z==0, reduce planes to lines and check theirs intersection
+						var delta = this.Vector.X * plane.Vector.Y - plane.Vector.X * this.Vector.Y;
+						if (delta != 0.0)
 						{
-							var x0 = (this._vector.Y * plane.D - plane.Vector.Y * this.D) / (this.Vector.X * plane.Vector.Y - plane.Vector.X * this.Vector.Y);
-							var y0 = (this.D * plane.Vector.X - plane.Vector.X * this.D) / (this.Vector.X * plane.Vector.Y - plane.Vector.X * this.Vector.Y);
-							var z0 = x0 / (this.Vector.Y * plane.Vector.Z - plane.Vector.Y * this.Vector.Z);
+							var x0 = (plane.Vector.Y * this.D - this.Vector.Y * plane.D) / delta;
+							var y0 = (this.Vector.X * plane.D - plane.Vector.X * this.D) / delta;
 
-							return new Line(new Point(new double[] { x0, y0, z0 }), resultVector);
+							var z0 = 0.0;
+							if (this._vector.Z != 0)
+							{
+								z0 = -(this._vector.X * x0 + this._vector.Y * y0 - this.D) / this._vector.Z;
+							}
+
+							var crossProduct = this._vector.CrossProduct(plane.Vector);
+
+							return new Line(new Point(new double[] { x0, y0, z0 }), crossProduct);
 						}
 
 						return null;
@@ -140,6 +154,17 @@ namespace LpSolve.Elements
 					//TODO: implement
 					throw new NotImplementedException("Implemented only for 2 and 3 dimensions");
 			}
+		}
+
+		private bool IsNotNull(params double[] vals)
+		{
+			foreach (var item in vals)
+			{
+				if (item == 0.0)
+					return false;
+			}
+
+			return true;
 		}
 	}
 }

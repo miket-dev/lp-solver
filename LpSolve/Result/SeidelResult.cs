@@ -84,7 +84,16 @@ namespace LpSolve.Result
 
 			var lastHalfSpace = polyhedron.HalfSpaces[polyhedron.HalfSpaces.Count - 1];
 
-			var innerSolver = new SeidelSolver(passPolyhedron, vector.MoveDown());
+			SeidelSolver innerSolver = null;
+			if (vector.GetDimension() == 3)
+			{
+				innerSolver = new SeidelSolver(passPolyhedron.HalfSpaces, vector.MoveDown());
+			}
+			else
+			{
+				innerSolver = new SeidelSolver(passPolyhedron, vector.MoveDown());
+			}
+
 			innerSolver.Run();
 
 			if (innerSolver.Result is InfeasibleSeidelResult)
