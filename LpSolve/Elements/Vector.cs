@@ -68,7 +68,7 @@ namespace LpSolve.Elements
 
 			return new Vector(result);
 		}
-
+        
 		public void AddVector(Vector vector)
 		{
 			var size = this._coordinates.Length;
@@ -102,6 +102,21 @@ namespace LpSolve.Elements
 
 			return result;
 		}
+
+        public Vector Rotate()
+        {
+            //rotating vector on 90 degrees
+            var coordinates = new double[this.GetDimension()];
+            coordinates[0] = this.Y;
+            coordinates[1] = this.X;
+
+            for (int i = 2; i < coordinates.Length; i++)
+            {
+                coordinates[i] = this.GetAt(i);
+            }
+
+            return new Vector(coordinates);
+        }
 
 		public Vector CrossProduct(Vector vector)
 		{

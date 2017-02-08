@@ -80,7 +80,9 @@ namespace LpSolve.Elements
 
 		public static Line CreateFromPoints(Point p0, Point p1)
 		{
-			return new Line(p0, Vector.CreateFromPoints(p0, p1));
+            var lineVector = Vector.CreateFromPoints(p0, p1);
+
+			return new Line(p0, lineVector.Rotate());
 		}
 	}
 }

@@ -7,242 +7,243 @@ using LpSolve.Elements;
 
 namespace LpSolve.Result
 {
-	/// <summary>
-	/// Base class for LP result
-	/// </summary>
-	public abstract class SeidelResult
-	{
-		public Point Point { get; protected set; }
+    /// <summary>
+    /// Base class for LP result
+    /// </summary>
+    public abstract class SeidelResult
+    {
+        public Point Point { get; protected set; }
 
-		public abstract SeidelResult Resolve(Polyhedron polyhedron, Vector vector, bool containsAny);
+        public abstract SeidelResult Resolve(Polyhedron polyhedron, Vector vector, bool containsAny);
 
-		protected SeidelResult ExtractMinimum(Polyhedron polyhedron, Vector vector)
-		{
-			var set = new List<Tuple<double, bool>>(); //point; is to positive, filled only when 1d
+        protected SeidelResult ExtractMinimum(Polyhedron polyhedron, Vector vector)
+        {
+            if (vector.GetDimension() > 1 && !polyhedron.Vertices.Any())
+            {
+                return this.SolveRecursive(polyhedron, vector);
+            }
 
-			if (vector.GetDimension() == 1)
-			{
-				//if every halfspace has same direction with the vector - unbounded
-				//else searching the minimum
-				var directions = new List<double>();
+            var set = new List<Tuple<double, bool>>(); //point; is to positive, filled only when 1d
 
-				foreach (var item in polyhedron.HalfSpaces)
-				{
-					var scalarProduct = item.Plane.Vector.ScalarProduct(vector) * (item.IsOnPositive ? 1.0 : -1.0);
+            if (vector.GetDimension() == 1)
+            {
+                //if every halfspace has same direction with the vector - unbounded
+                //else searching the minimum
+                var directions = new List<double>();
 
-					directions.Add(scalarProduct);
+                foreach (var item in polyhedron.HalfSpaces)
+                {
+                    var scalarProduct = item.Plane.Vector.ScalarProduct(vector) * (item.IsOnPositive ? 1.0 : -1.0);
 
-					var point = item.Get1DPoint();
-					if (point != null)
-					{
-						set.Add(Tuple.Create((double)point, (item.Plane.Vector.X > 0 && item.IsOnPositive) || (item.Plane.Vector.X < 0 && !item.IsOnPositive)));
-					}
-				}
+                    directions.Add(scalarProduct);
 
-				var orderedSet = set.OrderBy(x => x.Item1).ToList();
+                    var point = item.Get1DPoint();
+                    if (point != null)
+                    {
+                        set.Add(Tuple.Create((double)point, (item.Plane.Vector.X > 0 && item.IsOnPositive) || (item.Plane.Vector.X < 0 && !item.IsOnPositive)));
+                    }
+                }
 
-				if (!polyhedron.Vertices.Any())
-				{
-					//infeasible if set begins with false and when it become true
-					if (!orderedSet[0].Item2 && orderedSet.Any(x => x.Item2))
-					{
-						return new InfeasibleSeidelResult();
-					}
-					//or if begins with true, when meets false and after it true again
-					else if (orderedSet[0].Item2)
-					{
-						var start = true;
+                var orderedSet = set.OrderBy(x => x.Item1).ToList();
 
-						foreach (var item in orderedSet)
-						{
-							if (!start && item.Item2)
-							{
-								return new InfeasibleSeidelResult();
-							}
+                if (!polyhedron.Vertices.Any())
+                {
+                    //infeasible if set begins with false and when it become true
+                    if (!orderedSet[0].Item2 && orderedSet.Any(x => x.Item2))
+                    {
+                        return new InfeasibleSeidelResult();
+                    }
+                    //or if begins with true, when meets false and after it true again
+                    else if (orderedSet[0].Item2)
+                    {
+                        var start = true;
 
-							start = item.Item2;
-						}
-					}
-				}
+                        foreach (var item in orderedSet)
+                        {
+                            if (!start && item.Item2)
+                            {
+                                return new InfeasibleSeidelResult();
+                            }
 
-				if ((orderedSet[orderedSet.Count - 1].Item2 && vector.X < 0)
-					|| (!orderedSet[0].Item2 && vector.X > 0))
-				{
-					return new UnboundedSeidelResult();
-				}
-			}
+                            start = item.Item2;
+                        }
+                    }
+                }
 
-			var iterateArray = polyhedron.Vertices.Any() ? polyhedron.Vertices : set.Select(x => new Point(new double[] { x.Item1 })).ToList();
+                if ((orderedSet[orderedSet.Count - 1].Item2 && vector.X < 0)
+                    || (!orderedSet[0].Item2 && vector.X > 0))
+                {
+                    return new UnboundedSeidelResult();
+                }
+            }
 
-			return this.FindMinimum(iterateArray, vector);
-		}
+            var iterateArray = polyhedron.Vertices.Any() ? polyhedron.Vertices : set.Select(x => new Point(new double[] { x.Item1 })).ToList();
 
-		protected SeidelResult SolveRecursive(Polyhedron polyhedron, Vector vector)
-		{
-			//move one dimension lower
-			var passPolyhedron = polyhedron.MoveDown();
+            return this.FindMinimum(iterateArray, vector);
+        }
 
-			var lastHalfSpace = polyhedron.HalfSpaces[polyhedron.HalfSpaces.Count - 1];
+        protected SeidelResult SolveRecursive(Polyhedron polyhedron, Vector vector)
+        {
+            //move one dimension lower
+            var passPolyhedron = polyhedron.MoveDown();
 
-			SeidelSolver innerSolver = null;
-			if (vector.GetDimension() == 3)
-			{
-				innerSolver = new SeidelSolver(passPolyhedron.HalfSpaces, vector.MoveDown());
-			}
-			else
-			{
-				innerSolver = new SeidelSolver(passPolyhedron, vector.MoveDown());
-			}
+            var lastHalfSpace = polyhedron.HalfSpaces[polyhedron.HalfSpaces.Count - 1];
 
-			innerSolver.Run();
+            if (this.Point != null)
+            {
+                this.Point = this.Point.MoveDown();
+            }
 
-			if (innerSolver.Result is InfeasibleSeidelResult)
-			{
-				return new InfeasibleSeidelResult();
-			}
+            var innerSolver = new SeidelSolver(passPolyhedron, vector.MoveDown(), this);
+            innerSolver.Run();
 
-			var returnResult = innerSolver.Result;
+            if (innerSolver.Result is InfeasibleSeidelResult)
+            {
+                return new InfeasibleSeidelResult();
+            }
 
-			if (returnResult is MinimumSeidelResult)
-			{
-				var resultPoint = this.FindPointOnPlane(lastHalfSpace, returnResult.Point);
+            var returnResult = innerSolver.Result;
 
-				if (resultPoint == null)
-				{
-					return new UnboundedSeidelResult();
-				}
+            if (returnResult is MinimumSeidelResult)
+            {
+                var resultPoint = this.FindPointOnPlane(lastHalfSpace, returnResult.Point);
 
-				return new MinimumSeidelResult(resultPoint);
-			}
+                if (resultPoint == null)
+                {
+                    return new UnboundedSeidelResult();
+                }
 
-			if (returnResult is AmbigousSeidelResult)
-			{
-				var ambigousResult = (AmbigousSeidelResult)returnResult;
+                return new MinimumSeidelResult(resultPoint);
+            }
 
-				var halfSpaces = new List<HalfSpace>();
+            if (returnResult is AmbigousSeidelResult)
+            {
+                var ambigousResult = (AmbigousSeidelResult)returnResult;
 
-				var points = new List<Point>();
-				foreach (var point in ambigousResult.AmbigousPoints)
-				{
-					//searching point on planes
-					foreach (var halfSpace in polyhedron.HalfSpaces)
-					{
-						var resultPoint = this.FindPointOnPlane(halfSpace, point);
+                var halfSpaces = new List<HalfSpace>();
 
-						if (resultPoint == null)
-						{
-							continue;
-						}
+                var points = new List<Point>();
+                foreach (var point in ambigousResult.AmbigousPoints)
+                {
+                    //searching point on planes
+                    foreach (var halfSpace in polyhedron.HalfSpaces)
+                    {
+                        var resultPoint = this.FindPointOnPlane(halfSpace, point);
 
-						points.Add(resultPoint);
-					}
-				}
+                        if (resultPoint == null)
+                        {
+                            continue;
+                        }
 
-				return this.FindMinimum(points.Distinct().ToList(), vector);
-			}
+                        points.Add(resultPoint);
+                    }
+                }
 
-			return returnResult;
-		}
+                return this.FindMinimum(points.Distinct().ToList(), vector);
+            }
 
-		private Point FindPointOnPlane(HalfSpace halfspace, Point point)
-		{
-			//searching point on last plane
-			var plane = halfspace.Plane;
-			var planeNorm = plane.Vector;
+            return returnResult;
+        }
 
-			double? result = 0.0;
-			for (int i = 0; i < planeNorm.GetDimension(); i++)
-			{
-				if (i != planeNorm.GetDimension() - 1)
-				{
-					result -= planeNorm.GetAt(i) * point.GetAt(i);
-				}
-			}
+        private Point FindPointOnPlane(HalfSpace halfspace, Point point)
+        {
+            //searching point on last plane
+            var plane = halfspace.Plane;
+            var planeNorm = plane.Vector;
 
-			result += plane.D;
-			var den = planeNorm.GetAt(planeNorm.GetDimension() - 1);
+            double? result = 0.0;
+            for (int i = 0; i < planeNorm.GetDimension(); i++)
+            {
+                if (i != planeNorm.GetDimension() - 1)
+                {
+                    result -= planeNorm.GetAt(i) * point.GetAt(i);
+                }
+            }
 
-			if (den == 0) //plane is parallel to this dimensional axis
-			{
-				result = null;
-			}
-			else
-			{
-				result /= den;
-			}
+            result += plane.D;
+            var den = planeNorm.GetAt(planeNorm.GetDimension() - 1);
 
-			var resultCoeffs = new double[planeNorm.GetDimension()];
-			for (int i = 0; i < point.GetDimension(); i++)
-			{
-				resultCoeffs[i] = point.GetAt(i);
-			}
+            if (den == 0) //plane is parallel to this dimensional axis
+            {
+                result = null;
+            }
+            else
+            {
+                result /= den;
+            }
 
-			if (result == null)
-			{
-				return null;
-			}
+            var resultCoeffs = new double[planeNorm.GetDimension()];
+            for (int i = 0; i < point.GetDimension(); i++)
+            {
+                resultCoeffs[i] = point.GetAt(i);
+            }
 
-			resultCoeffs[resultCoeffs.Length - 1] = (double)result;
+            if (result == null)
+            {
+                return null;
+            }
 
-			return new Point(resultCoeffs);
-		}
+            resultCoeffs[resultCoeffs.Length - 1] = (double)result;
 
-		private SeidelResult FindMinimum(List<Point> iterateArray, Vector vector)
-		{
-			var minimumArray = new List<double>();
-			var minimumPointArray = new List<Point>();
+            return new Point(resultCoeffs);
+        }
 
-			if (iterateArray.Count == 0)
-			{
-				return new UnboundedSeidelResult();
-			}
+        private SeidelResult FindMinimum(List<Point> iterateArray, Vector vector)
+        {
+            var minimumArray = new List<double>();
+            var minimumPointArray = new List<Point>();
 
-			foreach (var item in iterateArray)
-			{
-				var tempMin = 0.0;
-				for (int i = 0; i < vector.GetDimension(); i++)
-				{
-					tempMin += vector.GetAt(i) * item.GetAt(i);
-				}
+            if (iterateArray.Count == 0)
+            {
+                return new UnboundedSeidelResult();
+            }
 
-				minimumArray.Add(tempMin);
-				minimumPointArray.Add(item);
-			}
+            foreach (var item in iterateArray)
+            {
+                var tempMin = 0.0;
+                for (int i = 0; i < vector.GetDimension(); i++)
+                {
+                    tempMin += vector.GetAt(i) * item.GetAt(i);
+                }
 
-			var minimum = double.MaxValue;
-			var index = new List<int>();
-			var count = 0;
-			for (int i = 0; i < minimumArray.Count; i++)
-			{
-				var item = minimumArray[i];
-				if (minimum > item)
-				{
-					minimum = item;
-					index.Clear();
-					index.Add(i);
-					count = 0;
-				}
+                minimumArray.Add(tempMin);
+                minimumPointArray.Add(item);
+            }
 
-				if (!index.Contains(i) && minimum == item)
-				{
-					index.Add(i);
-					count++;
-				}
-			}
+            var minimum = double.MaxValue;
+            var index = new List<int>();
+            var count = 0;
+            for (int i = 0; i < minimumArray.Count; i++)
+            {
+                var item = minimumArray[i];
+                if (minimum > item)
+                {
+                    minimum = item;
+                    index.Clear();
+                    index.Add(i);
+                    count = 0;
+                }
 
-			if (count > 0)
-			{
-				var points = new Point[index.Count];
-				for (int i = 0; i < index.Count; i++)
-				{
-					var item = index[i];
-					points[i] = minimumPointArray[item];
-				}
+                if (!index.Contains(i) && minimum == item)
+                {
+                    index.Add(i);
+                    count++;
+                }
+            }
 
-				return new AmbigousSeidelResult(points);
-			}
+            if (count > 0)
+            {
+                var points = new Point[index.Count];
+                for (int i = 0; i < index.Count; i++)
+                {
+                    var item = index[i];
+                    points[i] = minimumPointArray[item];
+                }
 
-			return new MinimumSeidelResult(minimumPointArray[index[0]]);
-		}
-	}
+                return new AmbigousSeidelResult(points);
+            }
+
+            return new MinimumSeidelResult(minimumPointArray[index[0]]);
+        }
+    }
 }

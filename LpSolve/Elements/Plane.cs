@@ -129,7 +129,7 @@ namespace LpSolve.Elements
 
 							var crossProduct = this._vector.CrossProduct(plane.Vector);
 
-							return new Line(new Point(new double[] { x0, y0, z0 }), crossProduct);
+							return new Line(new Point(new double[] { x0, y0, z0 }), crossProduct.Rotate());
 						}
 
 						return null;

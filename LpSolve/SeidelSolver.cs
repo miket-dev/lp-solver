@@ -32,17 +32,18 @@ namespace LpSolve
 			this._resultType = new UnboundedSeidelResult();
 		}
 
-		public SeidelSolver(Polyhedron polyhedron, Vector vector)
+        public SeidelSolver(Polyhedron polyhedron, Vector vector, SeidelResult resultType)
 			: this(new List<HalfSpace>(), vector)
 		{
 			this._resultPolyhedron = polyhedron;
+            this._resultType = resultType;
 		}
 
 		public void Run()
 		{
 			if (!this._halfSpaces.Any())
 			{
-				this._resultType = new UnboundedSeidelResult().Resolve(this._resultPolyhedron, this._vector, false);
+				this._resultType = this._resultType.Resolve(this._resultPolyhedron, this._vector, false);
 				return;
 			}
 
@@ -82,7 +83,7 @@ namespace LpSolve
 
 			public int Next(int count)
 			{
-				return count - 1;
+				return 0;
 			}
 		}
 	}
