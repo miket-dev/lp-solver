@@ -62,7 +62,16 @@ namespace LpSolve.Elements
 #if DEBUG
 		public override string ToString()
 		{
-			return string.Format("({0:n2},{1:n2})", this.X, this.Y);
+			var format = "(";
+
+			for (int i = 0; i < this._coordinates.Length; i++)
+			{
+				format += "{" + i + ":n2},";
+			}
+
+			format = format.Substring(0, format.Length - 1) + ")";
+
+			return string.Format(format, this._coordinates);
 		}
 #endif
 

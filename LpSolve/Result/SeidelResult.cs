@@ -183,6 +183,11 @@ namespace LpSolve.Result
 			var minimumArray = new List<double>();
 			var minimumPointArray = new List<Point>();
 
+			if (iterateArray.Count == 0)
+			{
+				return new UnboundedSeidelResult();
+			}
+
 			foreach (var item in iterateArray)
 			{
 				var tempMin = 0.0;

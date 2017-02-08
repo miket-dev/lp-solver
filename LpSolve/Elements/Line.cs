@@ -56,10 +56,26 @@ namespace LpSolve.Elements
 			if (den == 0)
 				return null;
 
+			var resultArray = new double[line.GetDimension()];
+
 			var x = (this.C * line.Vector.Y - this.Vector.Y * line.C) / den;
 			var y = (this._vector.X * line.C - this.C * line.Vector.X) / den;
 
-			return new Point(new double[] { x, y });
+			resultArray[0] = x;
+			resultArray[1] = y;
+
+			if (line.GetDimension() == 3)
+			{
+				var z1 = -(this._vector.X * x + this._vector.Y * y + this.C);
+				var z2 = -(line._vector.X * x + line._vector.Y * y + line.C);
+
+				if (z1 != z2)
+					return null;
+
+				resultArray[2] = z1;
+			}
+
+			return new Point(resultArray);
 		}
 
 		public static Line CreateFromPoints(Point p0, Point p1)

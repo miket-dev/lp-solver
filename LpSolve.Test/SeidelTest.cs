@@ -163,5 +163,50 @@ namespace LpSolve.Test
 			Assert.IsInstanceOfType(solver.Result, typeof(InfeasibleSeidelResult));
 		}
 
+		[TestMethod]
+		public void Seidel_3D()
+		{
+			//x + y - z >= 8
+			var halfSpace1 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0.0, 0.0, -8.0 }),
+							new Vector(new double[] { 1.0, 1.0, -1.0 })
+						),
+					true
+				);
+			//x - y + 2z >=2
+			var halfSpace2 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0.0, 0.0, -1 }),
+							new Vector(new double[] { 1.0, -1.0, 2.0 })
+						),
+					true
+				);
+
+			//-2x-8y+3z >= 1
+			var halfSpace4 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 4.0, 0.0, 3.0 }),
+							new Vector(new double[] { -2.0, -8.0, 3.0 })
+						),
+					true
+				);
+
+			//x >= 0
+			var halfSpace5 = new HalfSpace(
+					new Plane(
+							new Point(new double[] { 0.0, 0.0, 0.0 }),
+							new Vector(new double[] { 1.0, 0.0, 0.0 })
+						),
+					true
+				);
+
+			//2x + y - 2z -> min
+			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace4, halfSpace5 }, new Vector(new double[] { 2.0, 1.0, -2.0 }));
+			solver.Run();
+
+			Assert.IsInstanceOfType(solver.Result, typeof(UnboundedSeidelResult));
+		}
+
 	}
 }
