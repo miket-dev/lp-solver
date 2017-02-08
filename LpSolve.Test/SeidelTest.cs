@@ -62,13 +62,13 @@ namespace LpSolve.Test
 			Assert.AreEqual(3.0, halfSpace2.Plane.D);
 			Assert.AreEqual(15.0, halfSpace3.Plane.D);
 
-			//x-2y -> min
-			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace3, halfSpace4, halfSpace5 }, new Vector(new double[] { 1.0, -2.0 }));
+			//-x+2y -> min
+			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace3, halfSpace4, halfSpace5 }, new Vector(new double[] { -1.0, 2.0 }));
 			solver.Run();
 
 			Assert.IsInstanceOfType(solver.Result, typeof(MinimumSeidelResult));
-			Assert.AreEqual(15.0, solver.Result.Point.X);
-			Assert.AreEqual(12.0, solver.Result.Point.Y);
+			Assert.AreEqual(4.875, solver.Result.Point.X);
+			Assert.AreEqual(1.875, solver.Result.Point.Y);
 		}
 
 		[TestMethod]
@@ -78,9 +78,9 @@ namespace LpSolve.Test
 			var halfSpace1 = new HalfSpace(
 					new Plane(
 							new Point(new double[] { 3.0, 0.0 }),
-							new Vector(new double[] { 1.0, 0.0 })
+							new Vector(new double[] { -1.0, 0.0 })
 						),
-					false
+					true
 				);
 			//x>=-1
 			var halfSpace2 = new HalfSpace(
@@ -97,7 +97,7 @@ namespace LpSolve.Test
 							new Point(new double[] { -3.0, 0.0 }),
 							new Vector(new double[] { -2.0, -3.0 })
 						),
-					true
+					false
 				);
 
 			//-x+2y<=6
@@ -109,13 +109,13 @@ namespace LpSolve.Test
 					false
 				);
 
-			//2x-y -> min
-			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace3, halfSpace4 }, new Vector(new double[] { 2.0, -1.0 }));
+			//-2x+y -> min
+			var solver = new SeidelSolver(new List<HalfSpace> { halfSpace1, halfSpace2, halfSpace3, halfSpace4 }, new Vector(new double[] { -2.0, 1.0 }));
 			solver.Run();
 
 			Assert.IsInstanceOfType(solver.Result, typeof(MinimumSeidelResult));
-			Assert.AreEqual(-4.2857142857142856, solver.Result.Point.X);
-			Assert.AreEqual(0.8571428571428571, solver.Result.Point.Y);
+			Assert.AreEqual(3.0, solver.Result.Point.X);
+			Assert.AreEqual(-4.0, solver.Result.Point.Y);
 		}
 
 		[TestMethod]

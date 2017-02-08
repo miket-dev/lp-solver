@@ -64,13 +64,26 @@ namespace LpSolve
 				this._resultPolyhedron.RecountVertices();
 			}
 
-			if ((this._vector.GetDimension() == 1 || !this._resultPolyhedron.Vertices.Any()) && !(this._resultType is InfeasibleSeidelResult))
+			if ((this._resultPolyhedron.HalfSpaces.Count == 1) && !(this._resultType is InfeasibleSeidelResult))
 			{
 				this._resultType = new UnboundedSeidelResult();
 				return;
 			}
 
 			this._resultType = this._resultType.Resolve(this._resultPolyhedron, this._vector, this._halfSpaces.Any());
+		}
+
+		private class FakeRandom
+		{
+			public FakeRandom(int seed)
+			{
+
+			}
+
+			public int Next(int count)
+			{
+				return count - 1;
+			}
 		}
 	}
 }

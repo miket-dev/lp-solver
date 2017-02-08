@@ -42,7 +42,7 @@ namespace LpSolve.Elements
 
 		public double GetAt(int index)
 		{
-			return this._coordinates[index];
+			return this._coordinates.Length > index ? this._coordinates[index] : 0.0;
 		}
 
 		public int GetDimension()
