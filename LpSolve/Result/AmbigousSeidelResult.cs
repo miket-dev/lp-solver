@@ -16,10 +16,9 @@ namespace LpSolve.Result
 			this.AmbigousPoints = points;
 		}
 
-		public override SeidelResult Resolve(Polyhedron polyhedron, Vector vector, bool containsAny)
+		public override SeidelResult Resolve(HalfSpace halfSpace)
 		{
-			//just recalculate minimum
-			return this.SolveRecursive(polyhedron, vector);
+			throw new NotImplementedException();
 		}
 	}
 }

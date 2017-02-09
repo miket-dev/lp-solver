@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LpSolve.Elements;
 
 namespace LpSolve.Interface
 {
@@ -15,8 +16,8 @@ namespace LpSolve.Interface
 		where TResult : IElement
 	{
 		/// <summary>
-		/// Decreases the dimension
+		/// Projects element on passed n-dimensional plane
 		/// </summary>
-		TResult MoveDown();
+		TResult MoveDown(Plane plane);
 	}
 }

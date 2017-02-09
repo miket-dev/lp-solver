@@ -44,17 +44,26 @@
     <Compile Include="Elements\HalfSpace.cs" />
     <Compile Include="Elements\Line.cs" />
     <Compile Include="Elements\Point.cs" />
-    <Compile Include="Elements\Polyhedron.cs" />
     <Compile Include="Elements\Vector.cs" />
     <Compile Include="Elements\Plane.cs" />
     <Compile Include="Interface\IElement.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Result\AmbigousSeidelResult.cs" />
-    <Compile Include="Result\InfeasibleSeidelResult.cs" />
-    <Compile Include="Result\MinimumSeidelResult.cs" />
-    <Compile Include="Result\SeidelResult.cs" />
-    <Compile Include="Result\UnboundedSeidelResult.cs" />
+    <Compile Include="Result\AmbigousSeidelResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Result\InfeasibleSeidelResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Result\MinimumSeidelResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Result\SeidelResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Result\UnboundedSeidelResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SeidelSolver.cs" />
   </ItemGroup>
   <ItemGroup>

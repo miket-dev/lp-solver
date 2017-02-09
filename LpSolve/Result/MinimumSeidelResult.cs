@@ -14,18 +14,9 @@ namespace LpSolve.Result
 			this.Point = minimumPoint;
 		}
 
-		public override SeidelResult Resolve(Polyhedron polyhedron, Vector vector, bool containsAny)
+		public override SeidelResult Resolve(HalfSpace halfSpace)
 		{
-			//simply check if current result satisfies the new constraint
-			var lastHalfSpace = polyhedron.HalfSpaces[polyhedron.HalfSpaces.Count - 1];
-
-			if (lastHalfSpace.Contains(this.Point))
-			{
-				return this;
-			}
-
-			polyhedron.RecountVertices();
-			return this.SolveRecursive(polyhedron, vector);
+			throw new NotImplementedException();
 		}
 	}
 }

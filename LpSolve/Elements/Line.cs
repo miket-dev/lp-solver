@@ -34,9 +34,11 @@ namespace LpSolve.Elements
 			this._vector = vector;
 		}
 
-		public Line MoveDown()
+		public Line MoveDown(Plane plane)
 		{
-			return new Line(this._point.MoveDown(), this._vector.MoveDown());
+			var point = this._point.MoveDown(plane);
+			var vec = this._vector.MoveDown(plane);
+			return new Line(point, vec);
 		}
 
 		public int GetDimension()
@@ -44,45 +46,43 @@ namespace LpSolve.Elements
 			return this._point.GetDimension();
 		}
 
-		/// <summary>
-		/// Valid for 2 dimensions
-		/// </summary>
-		/// <param name="line"></param>
-		/// <returns></returns>
-		public Point Intersect(Line line)
+		public Point IntersectPlane(Plane plane)
 		{
-			var den = this._vector.X * line._vector.Y - this._vector.Y * line.Vector.X;
+			var fakeLinePoint = this._point;
+			var fakeLineVector = plane.Vector;
 
-			if (den == 0)
-				return null;
+			var den = plane.Vector.X * fakeLineVector.X +
+						plane.Vector.Y * fakeLineVector.Y +
+						plane.Vector.Z * fakeLineVector.Z; //last row is 0 if 2 dimensional line
 
-			var resultArray = new double[line.GetDimension()];
-
-			var x = (this.C * line.Vector.Y - this.Vector.Y * line.C) / den;
-			var y = (this._vector.X * line.C - this.C * line.Vector.X) / den;
-
-			resultArray[0] = x;
-			resultArray[1] = y;
-
-			if (line.GetDimension() == 3)
+			if (den != 0)
 			{
-				var z1 = -(this._vector.X * x + this._vector.Y * y + this.C);
-				var z2 = -(line._vector.X * x + line._vector.Y * y + line.C);
+				var nomPart = plane.Vector.X * fakeLinePoint.X +
+								plane.Vector.Y * fakeLinePoint.Y +
+								(plane.GetDimension() > 2 ? (plane.Vector.Z * fakeLinePoint.Z) : 0.0);
 
-				if (z1 != z2)
-					return null;
+				var x = fakeLinePoint.X - fakeLineVector.X * (nomPart / den);
+				var y = fakeLinePoint.Y - fakeLineVector.Y * (nomPart / den);
+				var z = 0.0;
+				if (plane.GetDimension() > 2)
+				{
+					z = fakeLinePoint.Z - fakeLineVector.Z * (nomPart / den);
+				}
 
-				resultArray[2] = z1;
+				var coord = new double[plane.GetDimension()];
+				coord[0] = x;
+				coord[1] = y;
+
+				if (coord.Length > 2)
+				{
+					coord[2] = z;
+				}
+
+				return new Point(coord);
 			}
 
-			return new Point(resultArray);
-		}
-
-		public static Line CreateFromPoints(Point p0, Point p1)
-		{
-            var lineVector = Vector.CreateFromPoints(p0, p1);
-
-			return new Line(p0, lineVector.Rotate());
+			//there is no intersection, line is parallel to plane
+			return null;
 		}
 	}
 }

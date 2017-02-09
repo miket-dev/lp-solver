@@ -30,35 +30,6 @@ namespace LpSolve.Elements
 			return this._coordinates[index];
 		}
 
-		public int GetDimension()
-		{
-			return this._coordinates.Length;
-		}
-
-		public Point MoveDown()
-		{
-			var coordinates = new double[this._coordinates.Length - 1];
-			for (int i = 0; i < coordinates.Length; i++)
-			{
-				coordinates[i] = this._coordinates[i];
-			}
-
-			return new Point(coordinates);
-		}
-
-		public Point MoveUp()
-		{
-			var coordinates = new double[this._coordinates.Length + 1];
-			for (int i = 0; i < this._coordinates.Length; i++)
-			{
-				coordinates[i] = this._coordinates[i];
-			}
-
-			coordinates[this._coordinates.Length] = 0;
-
-			return new Point(coordinates);
-		}
-
 #if DEBUG
 		public override string ToString()
 		{
@@ -94,6 +65,39 @@ namespace LpSolve.Elements
 			}
 
 			return result;
+		}
+
+		public Point MoveDown(Plane plane)
+		{
+			var line = new Line(this, Vector.CreateFromPoints(this, plane.Point));
+			//vector does not matter, it is a project and not a real intersection
+
+			var result = line.IntersectPlane(plane);
+
+			var newResult = new double[result.GetDimension() - 1];
+			for (int i = 0; i < newResult.Length; i++)
+			{
+				newResult[0] = result.GetAt(i);
+			}
+
+			return new Point(newResult);
+		}
+
+		public Point AddVector(Vector vector)
+		{
+			var coords = new double[this.GetDimension()];
+
+			for (int i = 0; i < coords.Length; i++)
+			{
+				coords[i] = this.GetAt(i) + vector.GetAt(i);
+			}
+
+			return new Point(coords);
+		}
+
+		public int GetDimension()
+		{
+			return this._coordinates.Length;
 		}
 	}
 }

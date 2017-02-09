@@ -103,26 +103,13 @@ namespace LpSolve.Elements
 			return result;
 		}
 
-        public Vector Rotate()
-        {
-            //rotating vector on 90 degrees
-            var coordinates = new double[this.GetDimension()];
-            coordinates[0] = this.Y;
-            coordinates[1] = this.X;
-
-            for (int i = 2; i < coordinates.Length; i++)
-            {
-                coordinates[i] = this.GetAt(i);
-            }
-
-            return new Vector(coordinates);
-        }
-
 		public Vector CrossProduct(Vector vector)
 		{
 			switch (this._coordinates.Length)
 			{
 				case 3:
+				case 2:
+				case 1:
 					var a = this;
 					var b = vector;
 
@@ -133,19 +120,33 @@ namespace LpSolve.Elements
 					return new Vector(new double[] { x, y, z });
 				default:
 					//TODO: Implement
-					throw new NotImplementedException("Implemented only for 3 dimensions");
+					throw new NotImplementedException("Implemented only for 1, 2 & 3 dimensions");
 			}
 		}
 
-		public Vector MoveDown()
+		public void Flip()
 		{
-			var coordinates = new double[this._coordinates.Length - 1];
-			for (int i = 0; i < coordinates.Length; i++)
+			for (int i = 0; i < this._coordinates.Length; i++)
 			{
-				coordinates[i] = this._coordinates[i];
+				this._coordinates[i] *= -1.0;
+			}
+		}
+
+		public Vector MoveDown(Plane plane)
+		{
+			var coords = new double[this.GetDimension()];
+			for (int i = 0; i < coords.Length; i++)
+			{
+				coords[i] = 1.0;
 			}
 
-			return new Vector(coordinates);
+			var p1 = new Point(coords);
+			var p2 = p1.AddVector(this);
+
+			var moveDownP1 = p1.MoveDown(plane);
+			var moveDownP2 = p2.MoveDown(plane);
+
+			return Vector.CreateFromPoints(moveDownP1, moveDownP2);
 		}
 	}
 }

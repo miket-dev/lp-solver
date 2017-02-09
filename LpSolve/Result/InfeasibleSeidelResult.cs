@@ -9,7 +9,7 @@ namespace LpSolve.Result
 {
 	public class InfeasibleSeidelResult : SeidelResult
 	{
-		public override SeidelResult Resolve(Polyhedron polyhedron, Vector vector, bool containsAny)
+		public override SeidelResult Resolve(HalfSpace halfSpace)
 		{
 			//if on the various step it is become infeasible
 			//it will be infeasible till the end

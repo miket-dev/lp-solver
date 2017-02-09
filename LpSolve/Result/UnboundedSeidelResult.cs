@@ -9,14 +9,9 @@ namespace LpSolve.Result
 {
 	public class UnboundedSeidelResult : SeidelResult
 	{
-		public override SeidelResult Resolve(Polyhedron polyhedron, Vector vector, bool containsAny)
+		public override SeidelResult Resolve(HalfSpace halfSpace)
 		{
-			if (!containsAny)
-			{
-				return this.ExtractMinimum(polyhedron, vector);
-			}
-
-			return this.SolveRecursive(polyhedron, vector);
+			throw new NotImplementedException();
 		}
 	}
 }

@@ -14,11 +14,11 @@ namespace LpSolve
 		private List<HalfSpace> _halfSpaces;
 		private Vector _vector;
 
-		private Polyhedron _resultPolyhedron;
+		private List<HalfSpace> _workHalfSpaces;
 		private FakeRandom _random;
-		private SeidelResult _resultType;
+		private SeidelResult _result;
 
-		public SeidelResult Result { get { return this._resultType; } }
+		public SeidelResult Result { get { return this._result; } }
 
 		public SeidelSolver(List<HalfSpace> halfSpaces, Vector vector)
 		{
@@ -28,26 +28,12 @@ namespace LpSolve
 			this._vector = vector;
 
 			this._random = new FakeRandom(DateTime.Now.Millisecond);
-			this._resultPolyhedron = new Polyhedron();
-			this._resultType = new UnboundedSeidelResult();
-		}
-
-        public SeidelSolver(Polyhedron polyhedron, Vector vector, SeidelResult resultType)
-			: this(new List<HalfSpace>(), vector)
-		{
-			this._resultPolyhedron = polyhedron;
-            this._resultType = resultType;
+			this._workHalfSpaces = new List<HalfSpace>();
 		}
 
 		public void Run()
 		{
-			if (!this._halfSpaces.Any())
-			{
-				this._resultType = this._resultType.Resolve(this._resultPolyhedron, this._vector, false);
-				return;
-			}
-
-			while (this._halfSpaces.Any() && !(this._resultType is InfeasibleSeidelResult))
+			while (this._halfSpaces.Any() && !(this._result is InfeasibleSeidelResult))
 			{
 				var space = this._halfSpaces[_random.Next(this._halfSpaces.Count)];
 
@@ -58,20 +44,55 @@ namespace LpSolve
 
 		private void Iterate(HalfSpace halfSpace)
 		{
-			this._resultPolyhedron.Add(halfSpace);
-
-			if (!(this._resultType is MinimumSeidelResult))
+			if (this._vector.GetDimension() != 1)
 			{
-				this._resultPolyhedron.RecountVertices();
-			}
+				var plane = halfSpace.Plane;
 
-			if ((this._resultPolyhedron.HalfSpaces.Count == 1) && !(this._resultType is InfeasibleSeidelResult))
-			{
-				this._resultType = new UnboundedSeidelResult();
-				return;
-			}
+				var passSpaces = new List<HalfSpace>();
+				foreach (var item in this._halfSpaces)
+				{
+					var passItem = item.MoveDown(plane);
 
-			this._resultType = this._resultType.Resolve(this._resultPolyhedron, this._vector, this._halfSpaces.Any());
+					if (passItem == null)
+					{
+						if (!halfSpace.Contains(item.Plane.Point) ||
+							!item.Contains(plane.Point))
+						{
+							this._result = new InfeasibleSeidelResult();
+
+							return;
+						}
+					}
+
+					passSpaces.Add(passItem);
+				}
+
+				this._workHalfSpaces.Add(halfSpace);
+
+				var innerSolver = new SeidelSolver(passSpaces, this._vector.MoveDown(plane));
+				innerSolver.Run();
+
+				var tempResult = innerSolver.Result;
+
+				if (tempResult is InfeasibleSeidelResult ||
+					tempResult is UnboundedSeidelResult)
+				{
+					this._result = tempResult;
+					return;
+				}
+				else if (tempResult is MinimumSeidelResult)
+				{
+					//move up the point
+					var point = tempResult.Point;
+
+					throw new ApplicationException("Moving up is not implemented, check the result");
+				}
+				else if (tempResult is AmbigousSeidelResult)
+				{
+					throw new ApplicationException("Moving up is not implemented, check the result");
+				}
+
+			}
 		}
 
 		private class FakeRandom
