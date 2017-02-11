@@ -143,10 +143,29 @@ namespace LpSolve.Elements
 			var p1 = new Point(coords);
 			var p2 = p1.AddVector(this);
 
-			var moveDownP1 = p1.MoveDown(plane);
-			var moveDownP2 = p2.MoveDown(plane);
+			var moveDownP1 = p1.MoveDown(plane, plane.Vector.Rotate90());
+			var moveDownP2 = p2.MoveDown(plane, plane.Vector.Rotate90());
 
 			return Vector.CreateFromPoints(moveDownP1, moveDownP2);
+		}
+
+		public Vector Rotate90()
+		{
+			var resultCoords = new double[this._coordinates.Length];
+
+			for (int i = 0; i < resultCoords.Length; i++)
+			{
+				resultCoords[i] = this._coordinates[i];
+			}
+
+			if (resultCoords.Length > 1)
+			{
+				var temp = resultCoords[0];
+				resultCoords[0] = resultCoords[1];
+				resultCoords[1] = temp;
+			}
+
+			return new Vector(resultCoords);
 		}
 	}
 }

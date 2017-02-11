@@ -56,7 +56,7 @@ namespace LpSolve.Elements
 				return null;
 			}
 
-			var point = this._point.MoveDown(plane);
+			var point = this._point.MoveDown(plane, this._vector);
 			var vec = this._vector.MoveDown(plane);
 
 			return new Plane(point, vec);

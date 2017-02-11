@@ -67,10 +67,11 @@ namespace LpSolve.Elements
 			return result;
 		}
 
-		public Point MoveDown(Plane plane)
+		public Point MoveDown(Plane plane, Vector vector)
 		{
-			var line = new Line(this, Vector.CreateFromPoints(this, plane.Point));
-			//vector does not matter, it is a project and not a real intersection
+			//point itself does not belong to any line or plane
+			//it requires to find an intersection of passed line or plane and projective plane
+			var line = new Line(this, vector);
 
 			var result = line.IntersectPlane(plane);
 
@@ -81,6 +82,11 @@ namespace LpSolve.Elements
 			}
 
 			return new Point(newResult);
+		}
+
+		public Point MoveDown(Plane plane)
+		{
+			throw new ApplicationException("MoveDown(Plane, Vector) should be used");
 		}
 
 		public Point AddVector(Vector vector)

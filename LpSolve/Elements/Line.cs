@@ -36,7 +36,7 @@ namespace LpSolve.Elements
 
 		public Line MoveDown(Plane plane)
 		{
-			var point = this._point.MoveDown(plane);
+			var point = this._point.MoveDown(plane, this._vector);
 			var vec = this._vector.MoveDown(plane);
 			return new Line(point, vec);
 		}
@@ -49,7 +49,7 @@ namespace LpSolve.Elements
 		public Point IntersectPlane(Plane plane)
 		{
 			var fakeLinePoint = this._point;
-			var fakeLineVector = plane.Vector;
+			var fakeLineVector = this._vector;
 
 			var den = plane.Vector.X * fakeLineVector.X +
 						plane.Vector.Y * fakeLineVector.Y +
