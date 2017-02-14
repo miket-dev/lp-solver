@@ -52,11 +52,16 @@
   <ItemGroup>
     <Compile Include="SeidelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="LETest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LpSolve\LpSolve.csproj">
       <Project>{a7eb2a01-77d2-4d14-bd25-1fcd61508280}</Project>
       <Name>LpSolve</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MathExt\MathExt.csproj">
+      <Project>{f0e2ab6f-85cc-42c5-8684-769cd2866401}</Project>
+      <Name>MathExt</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

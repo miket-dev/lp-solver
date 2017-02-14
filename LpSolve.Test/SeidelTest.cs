@@ -28,7 +28,7 @@ namespace LpSolve.Test
 							new Point(new double[] { 3.0, 0.0 }),
 							new Vector(new double[] { 1.0, -1.0 })
 						),
-					true
+					false
 				);
 
 			//-3x+5y<=15
@@ -59,7 +59,7 @@ namespace LpSolve.Test
 				);
 
 			Assert.AreEqual(30.0, halfSpace1.Plane.D);
-			Assert.AreEqual(3.0, halfSpace2.Plane.D);
+			Assert.AreEqual(-3.0, halfSpace2.Plane.D);
 			Assert.AreEqual(-15.0, halfSpace3.Plane.D);
 
 			//-x+2y -> min

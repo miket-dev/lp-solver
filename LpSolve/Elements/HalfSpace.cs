@@ -10,14 +10,13 @@ namespace LpSolve.Elements
 	public class HalfSpace : IElement<HalfSpace>
 	{
 		private Plane _plane;
-		private bool _isOnPositive;
 
 		public Plane Plane { get { return this._plane; } }
 
 		public HalfSpace(Plane plane, bool isOnPositive)
 		{
 			this._plane = plane;
-			
+
 			if (!isOnPositive)
 			{
 				this._plane.Vector.Flip();
@@ -28,12 +27,7 @@ namespace LpSolve.Elements
 		{
 			var vect = Vector.CreateFromPoints(this._plane.Point, p);
 
-			if (this._isOnPositive)
-			{
-				return vect.ScalarProduct(this._plane.Vector) >= 0;
-			}
-
-			return vect.ScalarProduct(this._plane.Vector) <= 0;
+			return vect.ScalarProduct(this._plane.Vector) >= 0;
 		}
 
 		public HalfSpace MoveDown(Plane plane)
@@ -45,7 +39,7 @@ namespace LpSolve.Elements
 				return null;
 			}
 
-			return new HalfSpace(pl, this._isOnPositive);
+			return new HalfSpace(pl, true);
 		}
 
 		public int GetDimension()

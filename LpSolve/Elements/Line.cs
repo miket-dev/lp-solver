@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LpSolve.Interface;
+using MathExt;
 
 namespace LpSolve.Elements
 {
@@ -19,7 +20,7 @@ namespace LpSolve.Elements
 		{
 			get
 			{
-				return this._vector.X * this._point.X + this._vector.Y + this._point.Y;
+				return this._vector.X * this._point.X + this._vector.Y * this._point.Y;
 			}
 		}
 
@@ -51,35 +52,58 @@ namespace LpSolve.Elements
 			var fakeLinePoint = this._point;
 			var fakeLineVector = this._vector;
 
-			var den = plane.Vector.X * fakeLineVector.X +
-						plane.Vector.Y * fakeLineVector.Y +
-						plane.Vector.Z * fakeLineVector.Z; //last row is 0 if 2 dimensional line
-
-			if (den != 0)
+			if (plane.GetDimension() == 2)
 			{
-				var nomPart = plane.Vector.X * fakeLinePoint.X +
-								plane.Vector.Y * fakeLinePoint.Y +
-								(plane.GetDimension() > 2 ? (plane.Vector.Z * fakeLinePoint.Z) : 0.0);
+				//it is the line
+				//|ax + by - c = 0
+				//|a1x + b1y - c1 = 0
 
-				var x = fakeLinePoint.X - fakeLineVector.X * (nomPart / den);
-				var y = fakeLinePoint.Y - fakeLineVector.Y * (nomPart / den);
-				var z = 0.0;
-				if (plane.GetDimension() > 2)
-				{
-					z = fakeLinePoint.Z - fakeLineVector.Z * (nomPart / den);
-				}
+				var matrixA = Matrix.Create(new double[][] { 
+					new double[] { this._vector.X, this._vector.Y },
+					new double[] { plane.Vector.X, plane.Vector.Y}
+				});
 
-				var coord = new double[plane.GetDimension()];
-				coord[0] = x;
-				coord[1] = y;
+				var matrixB = Matrix.Create(new double[][] {
+					new double[] { this.C },
+					new double[] { plane.D}
+				});
 
-				if (coord.Length > 2)
-				{
-					coord[2] = z;
-				}
+				var solver = new LESolver();
 
-				return new Point(coord);
+				var result = solver.Solve(matrixA, matrixB);
+
+				return new Point(result);
 			}
+
+			//var den = plane.Vector.X * fakeLineVector.X +
+			//			plane.Vector.Y * fakeLineVector.Y +
+			//			plane.Vector.Z * fakeLineVector.Z; //last row is 0 if 2 dimensional line
+
+			//if (den != 0)
+			//{
+			//	var nomPart = plane.Vector.X * fakeLinePoint.X +
+			//					plane.Vector.Y * fakeLinePoint.Y +
+			//					(plane.GetDimension() > 2 ? (plane.Vector.Z * fakeLinePoint.Z) : 0.0);
+
+			//	var x = fakeLinePoint.X - fakeLineVector.X * (nomPart / den);
+			//	var y = fakeLinePoint.Y - fakeLineVector.Y * (nomPart / den);
+			//	var z = 0.0;
+			//	if (plane.GetDimension() > 2)
+			//	{
+			//		z = fakeLinePoint.Z - fakeLineVector.Z * (nomPart / den);
+			//	}
+
+			//	var coord = new double[plane.GetDimension()];
+			//	coord[0] = x;
+			//	coord[1] = y;
+
+			//	if (coord.Length > 2)
+			//	{
+			//		coord[2] = z;
+			//	}
+
+			//	return new Point(coord);
+			//}
 
 			//there is no intersection, line is parallel to plane
 			return null;

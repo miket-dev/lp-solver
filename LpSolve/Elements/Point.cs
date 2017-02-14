@@ -9,14 +9,27 @@ namespace LpSolve.Elements
 {
 	public class Point : IElement<Point>
 	{
+		private Point _parentPoint;
+
 		public double X { get { return this.GetAt(0); } }
 		public double Y { get { return this.GetAt(1); } }
 		public double Z { get { return this.GetAt(2); } }
+
+		public Point ParentPoint
+		{
+			get { return this._parentPoint; }
+		}
 
 		private double[] _coordinates;
 
 		public Point(double[] coordinates)
 		{
+			this._coordinates = coordinates;
+		}
+
+		public Point(double[] coordinates, Point parentPoint)
+		{
+			this._parentPoint = parentPoint;
 			this._coordinates = coordinates;
 		}
 
@@ -75,13 +88,18 @@ namespace LpSolve.Elements
 
 			var result = line.IntersectPlane(plane);
 
-			var newResult = new double[result.GetDimension() - 1];
-			for (int i = 0; i < newResult.Length; i++)
+			if (result == null || double.IsInfinity(result.X) || double.IsInfinity(result.Y))
+				return null;
+
+			if (plane.GetDimension() == 2)
 			{
-				newResult[0] = result.GetAt(i);
+				//set axis beginning as plane point
+				var vect = Vector.CreateFromPoints(plane.Point, result);
+
+				return new Point(new double[] { vect.Length }, result);
 			}
 
-			return new Point(newResult);
+			throw new NotImplementedException("Not implemented for 3d");
 		}
 
 		public Point MoveDown(Plane plane)
