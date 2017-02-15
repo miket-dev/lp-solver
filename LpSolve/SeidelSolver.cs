@@ -106,24 +106,36 @@ namespace LpSolve
 				{
 					if (item.Item1 == minimumPoint)
 					{
-						this._result = new AmbigousSeidelResult(new Point[] { new Point(new double[] { minimumPoint }) });
+						Point parentPoint = null;
+						foreach (var space in this._halfSpaces)
+						{
+							if (space.Plane.Point.X == minimumPoint)
+							{
+								parentPoint = space.Plane.Point.ParentPoint;
+								break;
+							}
+						}
+
+						this._result = new AmbigousSeidelResult(new Point[] { new Point(new double[] { minimumPoint }, parentPoint) });
 
 						return;
 					}
 				}
 
-				Point parentPoint = null;
-				foreach (var item in this._halfSpaces)
 				{
-					if (item.Plane.Point.X == minimumPoint)
+					Point parentPoint = null;
+					foreach (var item in this._halfSpaces)
 					{
-						parentPoint = item.Plane.Point.ParentPoint;
-						break;
+						if (item.Plane.Point.X == minimumPoint)
+						{
+							parentPoint = item.Plane.Point.ParentPoint;
+							break;
+						}
 					}
-				}
 
-				this._result = new MinimumSeidelResult(new Point(new double[] { minimumPoint }, parentPoint));
-				return;
+					this._result = new MinimumSeidelResult(new Point(new double[] { minimumPoint }, parentPoint));
+					return;
+				}
 			}
 
 			if (!orderedSet[0].Item2 && this._vector.X < 0)
@@ -321,17 +333,17 @@ namespace LpSolve
 
 		private class FakeRandomSequence
 		{
-			public int[] _vals = new int[]{ 0, 2, 0, 0 };
-			public int _counter;
+			private static int[] _vals = new int[]{ 2, 0, 0, 1, 1, 0, 0 };
+			private static int _counter = 0;
 
 			public FakeRandomSequence(int seed)
 			{
-				this._counter = 0;
+
 			}
 
 			public int Next(int count)
 			{
-				return this._vals[this._counter++];
+				return _vals[_counter++];
 			}
 		}
 	}

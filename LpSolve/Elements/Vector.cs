@@ -52,6 +52,11 @@ namespace LpSolve.Elements
 
 		public static Vector CreateFromPoints(Point point0, Point point1)
 		{
+			if (point0 == null || point1 == null)
+			{
+				throw new ArgumentException("point0 || point1");
+			}
+
 			if (point0.GetDimension() != point1.GetDimension())
 			{
 				throw new ArgumentException("Points are of different dimensions");
@@ -134,19 +139,30 @@ namespace LpSolve.Elements
 
 		public Vector MoveDown(Plane plane)
 		{
-			var coords = new double[this.GetDimension()];
-			for (int i = 0; i < coords.Length; i++)
+
+			if (this.GetDimension() == 2)
 			{
-				coords[i] = 1.0;
+				var coords = new double[this.GetDimension()];
+				for (int i = 0; i < coords.Length; i++)
+				{
+					coords[i] = 1.0;
+				}
+
+				var p1 = new Point(coords);
+				var p2 = p1.AddVector(this);
+
+				var moveDownP1 = p1.MoveDown(plane, this);
+				var moveDownP2 = p2.MoveDown(plane, this);
+
+				return Vector.CreateFromPoints(moveDownP1, moveDownP2);
 			}
 
-			var p1 = new Point(coords);
-			var p2 = p1.AddVector(this);
+			if (this.GetDimension() == 3)
+			{
+				return new Vector(new double[] { this._coordinates[0], this._coordinates[1] });
+			}
 
-			var moveDownP1 = p1.MoveDown(plane, this);
-			var moveDownP2 = p2.MoveDown(plane, this);
-
-			return Vector.CreateFromPoints(moveDownP1, moveDownP2);
+			throw new NotImplementedException("Implemented only for 2 and 3 dimensions");
 		}
 
 		public Vector Rotate90()

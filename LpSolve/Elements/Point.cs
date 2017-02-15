@@ -18,6 +18,7 @@ namespace LpSolve.Elements
 		public Point ParentPoint
 		{
 			get { return this._parentPoint; }
+			set { this._parentPoint = value; }
 		}
 
 		private double[] _coordinates;

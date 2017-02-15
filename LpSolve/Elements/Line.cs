@@ -72,7 +72,12 @@ namespace LpSolve.Elements
 
 				var result = solver.Solve(matrixA, matrixB);
 
-				return new Point(result);
+				return new Point(result, this._point.ParentPoint);
+			}
+
+			if (plane.GetDimension() == 3)
+			{
+
 			}
 
 			throw new NotImplementedException("Implemented only for 2d");
