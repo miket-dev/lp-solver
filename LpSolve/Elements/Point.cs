@@ -96,7 +96,9 @@ namespace LpSolve.Elements
 				//set axis beginning as plane point
 				var vect = Vector.CreateFromPoints(plane.Point, result);
 
-				return new Point(new double[] { vect.Length }, result);
+				var scalarProduct = vect.ScalarProduct(vector);
+				
+				return new Point(new double[] { scalarProduct > 0 ? vect.Length : -vect.Length }, result);
 			}
 
 			throw new NotImplementedException("Not implemented for 3d");

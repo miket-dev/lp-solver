@@ -15,7 +15,7 @@ namespace LpSolve
 		private Vector _vector;
 
 		private List<HalfSpace> _workHalfSpaces;
-		private FakeRandom _random;
+		private Random _random;
 		private SeidelResult _result;
 
 		public SeidelResult Result { get { return this._result; } }
@@ -27,8 +27,9 @@ namespace LpSolve
 			this._halfSpaces = halfSpaces;
 			this._vector = vector;
 
-			this._random = new FakeRandom(DateTime.Now.Millisecond);
+			this._random = new Random(DateTime.Now.Millisecond);
 			this._workHalfSpaces = new List<HalfSpace>();
+			this._result = new UnboundedSeidelResult();
 		}
 
 		public void Run()
@@ -37,12 +38,18 @@ namespace LpSolve
 			{
 				this.Resolve1D();
 			}
-			else
+			else if (this._halfSpaces.Any())
 			{
-				var space = this._halfSpaces[_random.Next(this._halfSpaces.Count)];
+				while (this._halfSpaces.Any() && (!(this._result is InfeasibleSeidelResult) || this._result == null))
+				{
+					var nextItem = _random.Next(this._halfSpaces.Count);
 
-				this._halfSpaces.Remove(space);
-				Iterate(space);
+					Console.WriteLine(nextItem);
+
+					var space = this._halfSpaces[nextItem];
+
+					Iterate(space);
+				}
 			}
 		}
 
@@ -174,58 +181,127 @@ namespace LpSolve
 					start = item.Item2;
 				}
 			}
+
+			this._result = new UnboundedSeidelResult();
 		}
 
 		private void Iterate(HalfSpace halfSpace)
 		{
-			var plane = halfSpace.Plane;
+			this._halfSpaces.Remove(halfSpace);
 
-			var passSpaces = new List<HalfSpace>();
-			foreach (var item in this._halfSpaces)
+			if (this._result is MinimumSeidelResult)
 			{
-				var passItem = item.MoveDown(plane);
+				//simply check if current minimum satisfies the new constaint
 
-				if (passItem == null)
+				if (!halfSpace.Contains(this._result.Point))
 				{
-					if (!halfSpace.Contains(item.Plane.Point) ||
-						!item.Contains(plane.Point))
-					{
-						this._result = new InfeasibleSeidelResult();
+					this._result = new UnboundedSeidelResult();
+				}
+			}
 
-						return;
+			if (this._result is AmbigousSeidelResult)
+			{
+				//check if there is only one satisfied point
+
+				Point minimumPoint = null;
+				var minimumCount = 0;
+
+				foreach (var item in ((AmbigousSeidelResult)this._result).AmbigousPoints)
+				{
+					if (halfSpace.Contains(item))
+					{
+						minimumCount++;
+						minimumPoint = item;
 					}
 				}
-				else
+
+				if (minimumCount == 0)
 				{
-					passSpaces.Add(passItem);
+					this._result = new UnboundedSeidelResult();
+				}
+				else if (minimumCount == 1)
+				{
+					this._result = new MinimumSeidelResult(minimumPoint);
+				}
+			}
+
+			if (this._result is UnboundedSeidelResult)
+			{
+				this._result = this.FindMinimum(this._workHalfSpaces, halfSpace);
+				
+				//if all items are in
+				//then searching the minimum point in the halfspace,
+				//which contains plane with same direction normal to target function
+				if (!this._halfSpaces.Any())
+				{
+					this._workHalfSpaces.Add(halfSpace);
+					HalfSpace workSpace = null;
+					foreach (var item in this._workHalfSpaces)
+					{
+						var scalarProduct = this._vector.ScalarProduct(item.Plane.Vector);
+						if (scalarProduct >= 0)
+						{
+							workSpace = item;
+							break;
+						}
+					}
+
+					if (workSpace != null)
+					{
+						this._workHalfSpaces.Remove(workSpace);
+
+						this._result = this.FindMinimum(this._workHalfSpaces, workSpace);
+					}
+
+					this._workHalfSpaces.Remove(halfSpace);
 				}
 			}
 
 			this._workHalfSpaces.Add(halfSpace);
+		}
 
-			var innerSolver = new SeidelSolver(passSpaces, this._vector.MoveDown(plane));
-			innerSolver.Run();
-
-			var tempResult = innerSolver.Result;
-
-			if (tempResult is InfeasibleSeidelResult ||
-				tempResult is UnboundedSeidelResult)
+		private SeidelResult FindMinimum(List<HalfSpace> workSpaces, HalfSpace halfSpace)
+		{
+			var passItems = new List<HalfSpace>();
+			foreach (var item in workSpaces)
 			{
-				this._result = tempResult;
-				return;
-			}
-			else if (tempResult is MinimumSeidelResult)
-			{
-				//move up the point
-				var point = tempResult.Point.ParentPoint;
+				var passItem = item.MoveDown(halfSpace.Plane);
 
-				this._result = new MinimumSeidelResult(point);
-				return;
+				if (passItem == null)
+				{
+					if (!halfSpace.Contains(item.Plane.Point) ||
+						!item.Contains(halfSpace.Plane.Point))
+					{
+						return new InfeasibleSeidelResult();
+					}
+				}
+				else
+				{
+					passItems.Add(passItem);
+				}
 			}
-			else if (tempResult is AmbigousSeidelResult)
+
+			//if vectors are not of same direction - the minimum point can not be aligned on it
+			if (halfSpace.Plane.Vector.ScalarProduct(this._vector) >= 0)
 			{
-				throw new ApplicationException("Moving up is not implemented, check the result");
+				var innerSolver = new SeidelSolver(passItems, this._vector.MoveDown(halfSpace.Plane));
+				innerSolver.Run();
+
+				var tempResult = innerSolver.Result;
+
+				if (tempResult is MinimumSeidelResult)
+				{
+					return new MinimumSeidelResult(tempResult.Point.ParentPoint);
+				}
+				else if (tempResult is AmbigousSeidelResult)
+				{
+					return new AmbigousSeidelResult(((AmbigousSeidelResult)tempResult).AmbigousPoints.Select(x => x.ParentPoint).ToArray());
+				}
+
+				return tempResult;
 			}
+
+			return new UnboundedSeidelResult();
 		}
 
 		private class FakeRandom
@@ -237,7 +313,23 @@ namespace LpSolve
 
 			public int Next(int count)
 			{
-				return 0;
+				return count - 1;
+			}
+		}
+
+		private class FakeRandomSequence
+		{
+			public int[] _vals = new int[]{ 0, 2, 0, 0 };
+			public int _counter;
+
+			public FakeRandomSequence(int seed)
+			{
+				this._counter = 0;
+			}
+
+			public int Next(int count)
+			{
+				return this._vals[this._counter++];
 			}
 		}
 	}
