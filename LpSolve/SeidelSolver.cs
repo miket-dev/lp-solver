@@ -44,7 +44,9 @@ namespace LpSolve
 				{
 					var nextItem = _random.Next(this._halfSpaces.Count);
 
+#if DEBUG
 					Console.WriteLine(nextItem);
+#endif
 
 					var space = this._halfSpaces[nextItem];
 

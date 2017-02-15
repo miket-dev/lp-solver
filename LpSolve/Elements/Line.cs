@@ -75,38 +75,7 @@ namespace LpSolve.Elements
 				return new Point(result);
 			}
 
-			//var den = plane.Vector.X * fakeLineVector.X +
-			//			plane.Vector.Y * fakeLineVector.Y +
-			//			plane.Vector.Z * fakeLineVector.Z; //last row is 0 if 2 dimensional line
-
-			//if (den != 0)
-			//{
-			//	var nomPart = plane.Vector.X * fakeLinePoint.X +
-			//					plane.Vector.Y * fakeLinePoint.Y +
-			//					(plane.GetDimension() > 2 ? (plane.Vector.Z * fakeLinePoint.Z) : 0.0);
-
-			//	var x = fakeLinePoint.X - fakeLineVector.X * (nomPart / den);
-			//	var y = fakeLinePoint.Y - fakeLineVector.Y * (nomPart / den);
-			//	var z = 0.0;
-			//	if (plane.GetDimension() > 2)
-			//	{
-			//		z = fakeLinePoint.Z - fakeLineVector.Z * (nomPart / den);
-			//	}
-
-			//	var coord = new double[plane.GetDimension()];
-			//	coord[0] = x;
-			//	coord[1] = y;
-
-			//	if (coord.Length > 2)
-			//	{
-			//		coord[2] = z;
-			//	}
-
-			//	return new Point(coord);
-			//}
-
-			//there is no intersection, line is parallel to plane
-			return null;
+			throw new NotImplementedException("Implemented only for 2d");
 		}
 	}
 }
