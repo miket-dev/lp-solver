@@ -241,7 +241,7 @@ namespace LpSolve.Test
 			var halfSpace5 = new HalfSpace(
 					new Plane(
 							new Point(new double[] { 0.0, 0.0, 0.0 }),
-							new Vector(new double[] { 1.0, 0.0, 0.0 })
+							new Vector(new double[] { 0.0, 1.0, 0.0 })
 						),
 					true
 				);
