@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{32356FF6-5CD4-4930-943F-D2161FB26E19}</ProjectGuid>
+    <RootNamespace>LpSolveCpp</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\cpp\App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\cpp\Elements\HalfSpace.h" />
+    <ClInclude Include="..\cpp\Elements\Line.h" />
+    <ClInclude Include="..\cpp\Elements\Plane.h" />
+    <ClInclude Include="..\cpp\Elements\Point.h" />
+    <ClInclude Include="..\cpp\Elements\Vector.h" />
+    <ClInclude Include="..\cpp\exceptionhelper.h" />
+    <ClInclude Include="..\cpp\Interface\IElement.h" />
+    <ClInclude Include="..\cpp\LESolver.h" />
+    <ClInclude Include="..\cpp\Matrix.h" />
+    <ClInclude Include="..\cpp\Program.h" />
+    <ClInclude Include="..\cpp\Result\AmbigousSeidelResult.h" />
+    <ClInclude Include="..\cpp\Result\InfeasibleSeidelResult.h" />
+    <ClInclude Include="..\cpp\Result\MinimumSeidelResult.h" />
+    <ClInclude Include="..\cpp\Result\SeidelResult.h" />
+    <ClInclude Include="..\cpp\Result\UnboundedSeidelResult.h" />
+    <ClInclude Include="..\cpp\SeidelSolver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\cpp\Elements\HalfSpace.cpp" />
+    <ClCompile Include="..\cpp\Elements\Line.cpp" />
+    <ClCompile Include="..\cpp\Elements\Plane.cpp" />
+    <ClCompile Include="..\cpp\Elements\Point.cpp" />
+    <ClCompile Include="..\cpp\Elements\Vector.cpp" />
+    <ClCompile Include="..\cpp\LESolver.cpp" />
+    <ClCompile Include="..\cpp\Matrix.cpp" />
+    <ClCompile Include="..\cpp\Program.cpp" />
+    <ClCompile Include="..\cpp\Result\AmbigousSeidelResult.cpp" />
+    <ClCompile Include="..\cpp\Result\InfeasibleSeidelResult.cpp" />
+    <ClCompile Include="..\cpp\Result\MinimumSeidelResult.cpp" />
+    <ClCompile Include="..\cpp\Result\SeidelResult.cpp" />
+    <ClCompile Include="..\cpp\Result\UnboundedSeidelResult.cpp" />
+    <ClCompile Include="..\cpp\SeidelSolver.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
