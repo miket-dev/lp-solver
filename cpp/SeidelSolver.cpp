@@ -140,10 +140,9 @@ namespace LpSolveCpp
 					}
 				}
 
-				double vals[] = { minimumPoint };
+				std::vector<double> vals = { minimumPoint };
 
-				Point tempVar(std::vector<double>(vals, vals + sizeof vals / sizeof vals[0]), parentPoint);
-				this->_result = new MinimumSeidelResult(&tempVar);
+				this->_result = new MinimumSeidelResult(new Point(vals, parentPoint));
 				return;
 			}
 		}
@@ -174,9 +173,9 @@ namespace LpSolveCpp
 				}
 			}
 
-			double vals[] = { minimumPoint };
+			std::vector<double> vals = { minimumPoint };
 
-			this->_result = new MinimumSeidelResult(new Point(std::vector<double>(vals, vals + sizeof vals / sizeof vals[0]), parentPoint));
+			this->_result = new MinimumSeidelResult(new Point(vals, parentPoint));
 			return;
 		}
 

@@ -34,6 +34,7 @@ namespace LpSolveCpp
 		Point::Point(std::vector<double> &coordinates)
 		{
 			this->_coordinates = coordinates;
+			this->_parentPoint = nullptr;
 		}
 
 		Point::Point(std::vector<double> &coordinates, Point *parentPoint)
@@ -52,21 +53,6 @@ namespace LpSolveCpp
 			return this->_coordinates[index];
 		}
 
-#if defined(DEBUG)
-		std::wstring Point::ToString()
-		{
-			auto format = L"(";
-
-			for (int i = 0; i < this->_coordinates.size(); i++)
-			{
-				format += std::wstring(L"{") + i + std::wstring(L":n2},");
-			}
-
-			format = format.substr(0, format.length() - 1) + std::wstring(L")");
-
-			return std::wstring::Format(format, this->_coordinates);
-		}
-#endif
 		bool Point::Equals(Point *obj)
 		{
 			auto result = true;

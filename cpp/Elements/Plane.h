@@ -23,7 +23,7 @@ namespace LpSolveCpp
 		class Plane : public IElement<Plane>
 		{
 		private:
-			double _d;
+			double _d = 0.0;
 			LpSolveCpp::Elements::Point *_point;
 			LpSolveCpp::Elements::Vector *_vector;
 

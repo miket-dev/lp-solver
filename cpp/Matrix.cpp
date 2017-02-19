@@ -24,69 +24,61 @@ namespace MathExt
 
 	double Matrix::Determinant(Matrix *matrix)
 	{
-		//if (matrix->getRank() == 1)
-		//{
-		//	return matrix->_arr[0][0];
-		//}
+		if (matrix->getRank() == 1)
+		{
+			return matrix->_arr[0][0];
+		}
 
-		//auto result = 0.0;
-		//for (int j = 0; j < matrix->getRank(); j++)
-		//{
-		//	result += (j % 2 == 0 ? 1.0 : -1.0) * matrix->_arr[0][j] * this->Determinant(matrix->Except(0, j));
-		//}
+		auto result = 0.0;
+		for (int j = 0; j < matrix->getRank(); j++)
+		{
+			result += (j % 2 == 0 ? 1.0 : -1.0) * matrix->_arr[0][j] * this->Determinant(matrix->Except(0, j));
+		}
 
-		//return result;
-		throw std::invalid_argument("");
+		return result;
 	}
 
 	Matrix *Matrix::Except(int rowNumber, int columnNumber)
 	{
-		//auto array_Renamed = std::vector<std::vector<double>>(this->_arr.size());
-		//std::copy(std::begin(this->_arr), std::end(this->_arr), array_Renamed);
+		auto array_Renamed = std::vector<std::vector<double>>(this->_arr);
 
-		//for (int i = 0; i < this->_arr.size(); i++)
-		//{
-		//	auto newArray = std::vector<double>();
-		//	std::copy(std::begin(this->_arr[i]), std::end(this->_arr[i]), newArray);
+		for (int i = 0; i < this->_arr.size(); i++)
+		{
+			auto newArray = std::vector<double>(this->_arr[i]);
 
-		//	array_Renamed[i] = newArray;
-		//}
+			array_Renamed[i] = newArray;
+		}
 
-		//std::vector<std::vector<double>> resultArray;
+		std::vector<std::vector<double>> resultArray;
 
-		//for (int i = 0; i < array_Renamed.size(); i++)
-		//{
-		//	auto arr = array_Renamed.at(i);
-		//	resultArray.push_back(this->RemoveSingleElement(arr, columnNumber));
-		//}
+		for (int i = 0; i < array_Renamed.size(); i++)
+		{
+			auto arr = array_Renamed.at(i);
+			resultArray.push_back(this->RemoveSingleElement(arr, columnNumber));
+		}
 
-		//return new Matrix(this->RemoveElement(resultArray, rowNumber));
-		throw std::invalid_argument("");
+		return new Matrix(this->RemoveElement(resultArray, rowNumber));
 	}
 
 	Matrix *Matrix::Replace(int columnNumber, Matrix *matrix)
 	{
-		//auto array_Renamed = std::vector<std::vector<double>>(this->_arr.size());
-		//std::copy(std::begin(this->_arr), std::end(this->_arr), array_Renamed);
+		auto array_Renamed = std::vector<std::vector<double>>(this->_arr);
 
-		//for (int i = 0; i < this->_arr.size(); i++)
-		//{
-		//	auto newArray = std::vector<double>(this->_arr[i].size());
+		for (int i = 0; i < this->_arr.size(); i++)
+		{
+			auto newArray = std::vector<double>(this->_arr[i]);
 
-		//	std::copy(std::begin(this->_arr[i]), std::end(this->_arr[i]), newArray);
+			array_Renamed[i] = newArray;
+		}
 
-		//	array_Renamed[i] = newArray;
-		//}
+		auto result = array_Renamed;
 
-		//auto result = array_Renamed;
+		for (int i = 0; i < result.size(); i++)
+		{
+			result[i][columnNumber] = matrix->_arr[i][0];
+		}
 
-		//for (int i = 0; i < result.size(); i++)
-		//{
-		//	result[i][columnNumber] = matrix->_arr[i][0];
-		//}
-
-		//return new Matrix(result);
-		throw std::invalid_argument("");
+		return new Matrix(result);
 	}
 
 	std::vector<std::vector<double>> Matrix::RemoveElement(std::vector<std::vector<double>> &item, int index)
