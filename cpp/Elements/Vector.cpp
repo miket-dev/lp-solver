@@ -6,24 +6,24 @@ namespace LpSolveCpp
 	namespace Elements
 	{
 
-		double Vector::getX() const
+		double Vector::getX()
 		{
 			return this->GetAt(0);
 		}
 
-		double Vector::getY() const
+		double Vector::getY()
 		{
 			return this->GetAt(1);
 		}
 
-		double Vector::getZ() const
+		double Vector::getZ()
 		{
 			return this->GetAt(2);
 		}
 
-		double Vector::getLength() const
+		double Vector::getLength()
 		{
-			if (!this->_length)
+			if (this->_length == 0)
 			{
 				auto sum = 0.0;
 				for (int i = 0; i < this->_coordinates.size(); i++)
@@ -34,7 +34,7 @@ namespace LpSolveCpp
 				this->_length = std::sqrt(sum);
 			}
 
-			return this->_length.value();
+			return this->_length;
 		}
 
 		Vector::Vector(std::vector<double> &coordinates)

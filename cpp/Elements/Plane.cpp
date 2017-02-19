@@ -8,12 +8,12 @@ namespace LpSolveCpp
 	namespace Elements
 	{
 
-		LpSolveCpp::Elements::Point *Plane::getPoint() const
+		LpSolveCpp::Elements::Point *Plane::getPoint()
 		{
 			return this->_point;
 		}
 
-		LpSolveCpp::Elements::Vector *Plane::getVector() const
+		LpSolveCpp::Elements::Vector *Plane::getVector()
 		{
 			return this->_vector;
 		}
@@ -22,27 +22,27 @@ namespace LpSolveCpp
 		{
 			if (point->GetDimension() != vector->GetDimension())
 			{
-				throw std::invalid_argument(std::wstring::Format(L"Point{{0}} and Vector{{1}} are of different dimensions!", point->GetDimension(), vector->GetDimension()));
+				throw std::invalid_argument("Point and Vector are of different dimensions!");
 			}
 
 			this->_point = point;
 			this->_vector = vector;
 		}
 
-		double Plane::getD() const
+		double Plane::getD()
 		{
-			if (!this->_d)
+			if (this->_d == 0)
 			{
-				this->_d = 0;
+				_d = 0;
 
 				auto size = this->getPoint()->GetDimension();
 				for (int i = 0; i < size; i++)
 				{
-					this->_d += this->getPoint()->GetAt(i) * this->getVector()->GetAt(i);
+					_d += this->getPoint()->GetAt(i) * this->getVector()->GetAt(i);
 				}
 			}
 
-			return this->_d.value();
+			return _d;
 		}
 
 		Plane *Plane::MoveDown(Plane *plane)
@@ -72,17 +72,22 @@ namespace LpSolveCpp
 
 				//set x == 0
 				auto x = 0.0;
-				auto matrixA = Matrix::Create(std::vector<std::vector<double>>
+
+				auto vals1 = std::vector<std::vector<double>>
 				{
 					{this->_vector->getY(), this->_vector->getZ()},
-					{plane->getVector()->getY(), plane->getVector()->getZ()}
-				});
+					{ plane->getVector()->getY(), plane->getVector()->getZ() }
+				};
 
-				auto matrixB = Matrix::Create(std::vector<std::vector<double>>
+				auto matrixA = new Matrix(vals1);
+
+				auto vals2 = std::vector<std::vector<double>>
 				{
-					{this->getD()},
-					{plane->getD()}
-				});
+					{ this->getD() },
+					{ plane->getD() }
+				};
+
+				auto matrixB = new Matrix(vals2);
 
 				auto result = solver->Solve(matrixA, matrixB);
 
@@ -93,17 +98,21 @@ namespace LpSolveCpp
 				if (std::isinf(y) || std::isinf(z) || std::isnan(y) || std::isnan(z))
 				{
 					y = 0.0;
-					matrixA = Matrix::Create(std::vector<std::vector<double>>
-					{
-						{this->_vector->getX(), this->_vector->getZ()},
-						{plane->getVector()->getX(), plane->getVector()->getZ()}
-					});
 
-					matrixB = Matrix::Create(std::vector<std::vector<double>>
+					auto valsA = std::vector<std::vector<double>>
 					{
-						{this->getD()},
-						{plane->getD()}
-					});
+						{ this->_vector->getX(), this->_vector->getZ() },
+						{ plane->getVector()->getX(), plane->getVector()->getZ() }
+					};
+					matrixA = new Matrix(valsA);
+
+					auto valsB = std::vector<std::vector<double>>
+					{
+						{ this->getD() },
+						{ plane->getD() }
+					};
+
+					matrixB = new Matrix(valsB);
 
 					result = solver->Solve(matrixA, matrixB);
 
@@ -115,17 +124,21 @@ namespace LpSolveCpp
 				{
 					//set z to 0
 					z = 0.0;
-					matrixA = Matrix::Create(std::vector<std::vector<double>>
-					{
-						{this->_vector->getX(), this->_vector->getY()},
-						{plane->getVector()->getX(), plane->getVector()->getY()}
-					});
 
-					matrixB = Matrix::Create(std::vector<std::vector<double>>
+					auto valsA = std::vector<std::vector<double>>
 					{
-						{this->getD()},
-						{plane->getD()}
-					});
+						{ this->_vector->getX(), this->_vector->getY() },
+						{ plane->getVector()->getX(), plane->getVector()->getY() }
+					};
+					matrixA = new Matrix(valsA);
+
+					auto valsB = std::vector<std::vector<double>>
+					{
+						{ this->getD() },
+						{ plane->getD() }
+					};
+
+					matrixB = new Matrix(valsB);
 
 					result = solver->Solve(matrixA, matrixB);
 
@@ -139,8 +152,13 @@ namespace LpSolveCpp
 					return nullptr;
 				}
 
-				LpSolveCpp::Elements::Point tempVar(new double[] {x, y}, new Point(new double[] {x, y, z}));
-				LpSolveCpp::Elements::Vector tempVar2(new double[] {this->getVector()->getX(), this->getVector()->getY()});
+				std::vector<double> pointCoords = { x, y };
+				std::vector<double> parentPointCoords = { x, y, z };
+
+				LpSolveCpp::Elements::Point tempVar(pointCoords, new Point(parentPointCoords));
+
+				std::vector<double> vectorCoordinates = { this->getVector()->getX(), this->getVector()->getY() };
+				LpSolveCpp::Elements::Vector tempVar2(vectorCoordinates);
 				return new Plane(&tempVar, &tempVar2);
 			}
 

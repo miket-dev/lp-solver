@@ -9,17 +9,6 @@ using namespace LpSolveCpp::Result;
 
 namespace LpSolveCpp
 {
-	template<int M, template<typename> class F = std::less>
-	struct TupleCompare
-	{
-		template<typename T>
-		bool operator()(T const &t1, T const &t2)
-		{
-			return F<typename tuple_element<M, T>::type>()(std::get<M>(t1), std::get<M>(t2));
-		}
-	};
-
-
 	SeidelResult *SeidelSolver::getResult() const
 	{
 		return this->_result;
@@ -48,10 +37,6 @@ namespace LpSolveCpp
 			{
 				auto nextItem = rand() % this->_halfSpaces.size();
 
-	#if defined(DEBUG)
-				std::wcout << nextItem << std::endl;
-	#endif
-
 				auto space = this->_halfSpaces[nextItem];
 
 				Iterate(space);
@@ -63,17 +48,22 @@ namespace LpSolveCpp
 	{
 		auto set = std::vector<std::tuple<double, bool>>();
 
-		for (auto item : this->_halfSpaces)
+		for (int i = 0; i < this->_halfSpaces.size(); i++)
 		{
+			auto item = this->_halfSpaces.at(i);
 			set.push_back(std::make_tuple(item->getPlane()->getPoint()->getX(), item->getPlane()->getVector()->getX() > 0));
 		}
 
-		std::sort(set.begin(), set.end(), TupleCompare<0>());
+		std::sort(set.begin(), set.end(), [](const std::tuple<double, bool>& a,
+			const std::tuple<double, bool>& b) -> bool {
+			return std::get<0>(a) > std::get<0>(b);
+		});
 
 		auto containsTrue = false;
 
-		for each (auto item in set)
+		for (int i = 0; i < set.size(); i++)
 		{
+			auto item = set.at(i);
 			containsTrue |= std::get<1>(item);
 		}
 
@@ -87,8 +77,10 @@ namespace LpSolveCpp
 		{
 			auto start = true;
 
-			for (auto item : set)
+			for (int i = 0; i < set.size(); i++)
 			{
+				auto item = set.at(i);
+
 				if (!start && std::get<1>(item))
 				{
 					this->_result = new InfeasibleSeidelResult();
@@ -99,7 +91,7 @@ namespace LpSolveCpp
 			}
 		}
 
-		if ((std::get<1>(set.at(set.size() - 1)) && this->_vector->getX() < 0) || 
+		if ((std::get<1>(set.at(set.size() - 1)) && this->_vector->getX() < 0) ||
 			(!std::get<1>(set.at(0)) && this->_vector->getX() > 0))
 		{
 			this->_result = new UnboundedSeidelResult();
@@ -113,8 +105,9 @@ namespace LpSolveCpp
 
 			set.pop_back();
 
-			for (auto item : set)
+			for (int i = 0; i < set.size(); i++)
 			{
+				auto item = set.at(i);
 				if (std::get<0>(item) == minimumPoint)
 				{
 					Point *parentPoint = nullptr;
@@ -127,9 +120,10 @@ namespace LpSolveCpp
 						}
 					}
 
-					auto arr = { new Point({ minimumPoint }, parentPoint) };
+					double vals[] = { minimumPoint };
+					Point* arr[] = { new Point(std::vector<double>(vals, vals + sizeof vals / sizeof vals[0]), parentPoint) };
 
-					this->_result = new AmbigousSeidelResult(new std::vector<Point*>(arr, arr + sizeof(arr)/sizeof(arr[0])));
+					this->_result = new AmbigousSeidelResult(std::vector<Point*>(arr, arr + sizeof(arr) / sizeof(arr[0])));
 
 					return;
 				}
@@ -146,21 +140,23 @@ namespace LpSolveCpp
 					}
 				}
 
-				Point tempVar(new double[] {minimumPoint}, parentPoint);
+				double vals[] = { minimumPoint };
+
+				Point tempVar(std::vector<double>(vals, vals + sizeof vals / sizeof vals[0]), parentPoint);
 				this->_result = new MinimumSeidelResult(&tempVar);
 				return;
 			}
 		}
 
-		if (!orderedSet[0]->Item2 && this->_vector->getX() < 0)
+		if (!std::get<1>(set.at(0)) && this->_vector->getX() < 0)
 		{
-			auto minimumPoint = orderedSet[0]->Item1;
+			auto minimumPoint = std::get<0>(set.at(0));
 
-			orderedSet.erase(orderedSet.begin());
+			set.erase(std::remove(set.begin(), set.end(), set.at(0)), set.end());
 
-			for (auto item : orderedSet)
+			for (auto item : set)
 			{
-				if (item->Item1 == minimumPoint)
+				if (std::get<0>(item) == minimumPoint)
 				{
 					this->_result = new AmbigousSeidelResult(std::vector<Point*> {new Point(std::vector<double> {minimumPoint})});
 
@@ -178,22 +174,23 @@ namespace LpSolveCpp
 				}
 			}
 
-			Point tempVar2(new double[] {minimumPoint}, parentPoint);
-			this->_result = new MinimumSeidelResult(&tempVar2);
+			double vals[] = { minimumPoint };
+
+			this->_result = new MinimumSeidelResult(new Point(std::vector<double>(vals, vals + sizeof vals / sizeof vals[0]), parentPoint));
 			return;
 		}
 
-		if (orderedSet[0]->Item2 && !orderedSet[orderedSet.size() - 1]->Item2)
+		if (std::get<1>(set.at(0)) && !std::get<1>(set.at(set.size() - 1)))
 		{
 			auto start = true;
 
-			for (int i = 0; i < orderedSet.size(); i++)
+			for (int i = 0; i < set.size(); i++)
 			{
-				auto item = orderedSet[i];
-				if (start && !item->Item2)
+				auto item = set.at(i);
+				if (start && !std::get<1>(item))
 				{
 					Point *parentPoint = nullptr;
-					auto minimumPoint = orderedSet[i - 1]->Item1;
+					auto minimumPoint = std::get<0>(set.at(i - 1));
 					for (auto space : this->_halfSpaces)
 					{
 						if (space->getPlane()->getPoint()->getX() == minimumPoint)
@@ -203,12 +200,12 @@ namespace LpSolveCpp
 						}
 					}
 
-					Point tempVar3(new double[] {minimumPoint}, parentPoint);
-					this->_result = new MinimumSeidelResult(&tempVar3);
+					std::vector<double> vals = { minimumPoint };
+					this->_result = new MinimumSeidelResult(new Point(vals, parentPoint));
 					return;
 				}
 
-				start = item->Item2;
+				start = std::get<1>(item);
 			}
 		}
 
@@ -217,13 +214,13 @@ namespace LpSolveCpp
 
 	void SeidelSolver::Iterate(HalfSpace *halfSpace)
 	{
-		this->_halfSpaces.Remove(halfSpace);
+		this->_halfSpaces.erase(std::remove(this->_halfSpaces.begin(), this->_halfSpaces.end(), halfSpace), this->_halfSpaces.end());
 
 		if (dynamic_cast<MinimumSeidelResult*>(this->_result) != nullptr)
 		{
 			//simply check if current minimum satisfies the new constaint
 
-			if (!halfSpace->Contains(this->_result->Point))
+			if (!halfSpace->Contains(this->_result->getPoint()))
 			{
 				this->_result = new UnboundedSeidelResult();
 			}
@@ -262,7 +259,7 @@ namespace LpSolveCpp
 			//if all items are in
 			//then searching the minimum point in the halfspace,
 			//which contains plane with same direction normal to target function
-			if (!this->_halfSpaces.Any())
+			if (!this->_halfSpaces.size() > 0)
 			{
 				this->_workHalfSpaces.push_back(halfSpace);
 				HalfSpace *workSpace = nullptr;
@@ -278,12 +275,12 @@ namespace LpSolveCpp
 
 				if (workSpace != nullptr)
 				{
-					this->_workHalfSpaces.Remove(workSpace);
+					this->_workHalfSpaces.erase(std::remove(this->_workHalfSpaces.begin(), this->_workHalfSpaces.end(), workSpace), this->_workHalfSpaces.end());
 
 					this->_result = this->FindMinimum(this->_workHalfSpaces, workSpace);
 				}
 
-				this->_workHalfSpaces.Remove(halfSpace);
+				this->_workHalfSpaces.erase(std::remove(this->_workHalfSpaces.begin(), this->_workHalfSpaces.end(), halfSpace), this->_workHalfSpaces.end());
 			}
 		}
 
@@ -320,14 +317,21 @@ namespace LpSolveCpp
 
 			if (dynamic_cast<MinimumSeidelResult*>(tempResult) != nullptr)
 			{
-				return new MinimumSeidelResult(tempResult->Point.ParentPoint);
+				return new MinimumSeidelResult(tempResult->getPoint()->getParentPoint());
 			}
 			else if (dynamic_cast<AmbigousSeidelResult*>(tempResult) != nullptr)
 			{
-				return new AmbigousSeidelResult((static_cast<AmbigousSeidelResult*>(tempResult))->getAmbigousPoints().Select([&] (void *x)
+				std::vector<Point*> parentPoints;
+
+				auto ambigousPoints = (static_cast<AmbigousSeidelResult*>(tempResult))->getAmbigousPoints();
+
+				for (int i = 0; i < ambigousPoints.size(); i++)
 				{
-					x::ParentPoint;
-				})->ToArray());
+					auto p = ambigousPoints.at(i);
+					parentPoints.push_back(p->getParentPoint());
+				}
+
+				return new AmbigousSeidelResult(parentPoints);
 			}
 
 			return tempResult;
@@ -346,8 +350,8 @@ namespace LpSolveCpp
 		return count - 1;
 	}
 
-std::vector<int> SeidelSolver::FakeRandomSequence::_vals = {2, 0, 0, 1, 1, 0, 0};
-int SeidelSolver::FakeRandomSequence::_counter = 0;
+	std::vector<int> SeidelSolver::FakeRandomSequence::_vals = { 2, 0, 0, 1, 1, 0, 0 };
+	int SeidelSolver::FakeRandomSequence::_counter = 0;
 
 	SeidelSolver::FakeRandomSequence::FakeRandomSequence(int seed)
 	{

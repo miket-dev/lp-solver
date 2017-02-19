@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include "Point.h"
 #include "Vector.h"
+#include "../Interface/IElement.h"
+#include "../Matrix.h"
 
 namespace LpSolveCpp { namespace Elements { class Point; } }
 namespace LpSolveCpp { namespace Elements { class Vector; } }
@@ -18,7 +20,7 @@ namespace LpSolveCpp
 {
 	namespace Elements
 	{
-		class Plane : public IElement<Plane*>
+		class Plane : public IElement<Plane>
 		{
 		private:
 			double _d;
@@ -32,12 +34,12 @@ namespace LpSolveCpp
 				delete _vector;
 			}
 
-			LpSolveCpp::Elements::Point *getPoint() const;
-			LpSolveCpp::Elements::Vector *getVector() const;
+			LpSolveCpp::Elements::Point *getPoint();
+			LpSolveCpp::Elements::Vector *getVector();
 
 			Plane(LpSolveCpp::Elements::Point *point, LpSolveCpp::Elements::Vector *vector);
 
-			double getD() const;
+			double getD();
 
 			Plane *MoveDown(Plane *plane);
 

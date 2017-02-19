@@ -10,26 +10,15 @@ namespace MathExt
 	{
 	private:
 		std::vector<std::vector<double>> _arr;
+		double Determinant(Matrix *matrix);
+		Matrix *Except(int rowNumber, int columnNumber);
+		std::vector<std::vector<double>> RemoveElement(std::vector<std::vector<double>> &item, int index);
+		std::vector<double> RemoveSingleElement(std::vector<double> &item, int index);
 
 	public:
 		int getRank() const;
-
-	private:
 		Matrix(std::vector<std::vector<double>> &array_Renamed);
-
-	public:
 		double Determinant();
-
-	private:
-		double Determinant(Matrix *matrix);
-
-		Matrix *Except(int rowNumber, int columnNumber);
-
-	public:
 		Matrix *Replace(int columnNumber, Matrix *matrix);
-
-	private:
-		template<typename T>
-		std::vector<T> RemoveElement(std::vector<T> &item, int index);
 	};
 }

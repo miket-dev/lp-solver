@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include "Point.h"
 #include "Plane.h"
+#include "../Interface/IElement.h"
 
 namespace LpSolveCpp { namespace Elements { class Point; } }
 namespace LpSolveCpp { namespace Elements { class Plane; } }
@@ -15,7 +16,7 @@ namespace LpSolveCpp
 {
 	namespace Elements
 	{
-		class Vector : public IElement<Vector*>
+		class Vector : public IElement<Vector>
 		{
 		public:
 			double getX();

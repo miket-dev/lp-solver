@@ -72,12 +72,12 @@ namespace LpSolveCpp
 				arrA.push_back(arrA2);
 
 
-				auto matrixA = Matrix::Create(arrA);
+				auto matrixA = new Matrix(arrA);
 
-				auto matrixB = Matrix::Create(std::vector<std::vector<double>>
+				auto matrixB = new Matrix(std::vector<std::vector<double>>
 				{
 					{this->getC()},
-					{plane->getD()}
+					{ plane->getD() }
 				});
 
 				auto solver = new LESolver();

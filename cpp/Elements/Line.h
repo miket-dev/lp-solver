@@ -6,6 +6,7 @@
 #include "../exceptionhelper.h"
 #include "../Matrix.h"
 #include "../LESolver.h"
+#include "../Interface/IElement.h"
 
 namespace LpSolveCpp { namespace Elements { class Point; } }
 namespace LpSolveCpp { namespace Elements { class Vector; } }
@@ -18,7 +19,7 @@ namespace LpSolveCpp
 {
 	namespace Elements
 	{
-		class Line : public IElement<Line*>
+		class Line : public IElement<Line>
 		{
 		private:
 			LpSolveCpp::Elements::Point *_point;

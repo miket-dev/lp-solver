@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "../Interface/IElement.h"
 
 namespace LpSolveCpp { namespace Elements { class Plane; } }
 namespace LpSolveCpp { namespace Elements { class Point; } }
@@ -9,13 +10,13 @@ namespace LpSolveCpp
 {
 	namespace Elements
 	{
-		class HalfSpace : public IElement<HalfSpace*>
+		class HalfSpace : public IElement<HalfSpace>
 		{
 		private:
 			LpSolveCpp::Elements::Plane *_plane;
 
 		public:
-			virtual ~HalfSpace()
+			~HalfSpace()
 			{
 				delete _plane;
 			}
@@ -26,7 +27,7 @@ namespace LpSolveCpp
 
 			bool Contains(Point *p);
 
-			HalfSpace *MoveDown(LpSolveCpp::Elements::Plane *plane);
+			HalfSpace* MoveDown(LpSolveCpp::Elements::Plane *plane);
 
 			int GetDimension();
 		};

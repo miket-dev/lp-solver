@@ -19,7 +19,7 @@ namespace LpSolveCpp
 {
 	namespace Elements
 	{
-		class Point : public IElement<Point*>
+		class Point : public IElement<Point>
 		{
 		private:
 			Point *_parentPoint;
@@ -46,10 +46,6 @@ namespace LpSolveCpp
 			Point(std::vector<double> &coordinates, Point *parentPoint);
 
 			double GetAt(int index);
-
-	#if defined(DEBUG)
-			virtual std::wstring ToString() override;
-	#endif
 
 			virtual bool Equals(Point *obj);
 
